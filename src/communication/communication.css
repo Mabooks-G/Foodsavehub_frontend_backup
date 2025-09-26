@@ -1,0 +1,28 @@
+.communication-container {
+  max-width: 500px;
+  margin: 20px auto;
+  font-family: Arial, sans-serif;
+  text-align: center;
+}
+
+.communication-options {
+  margin-top: 20px;
+}
+
+.option-card {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 15px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.option-card:hover {
+  background-color: #f5f5f5;
+}
+
+.chat-link {
+  text-decoration: none;
+  color: inherit;
+}

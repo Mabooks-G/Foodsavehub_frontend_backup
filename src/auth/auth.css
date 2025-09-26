@@ -1,0 +1,293 @@
+/* Author: Bethlehem Shimelis
+   Event: Sprint 1: Manually Input Food Items with Expiry dates
+   LatestUpdate: Established User Login and Registration
+   parameters: user input
+   Description: Designs UI for registration and Login
+   Returns: posts to the API backend */
+
+/* Body / Background */
+/* --- Base Reset & Body --- */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+    Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+}
+
+.app-title, .subtitle, .input-field, .primary-btn, .toggle-link {
+  font-family: inherit; /* ensures everything uses Apple UI font */
+}
+
+body {
+  background-color: #FF9F45; /* warm orange */
+  height: 100vh;
+  margin: 0;
+  display: flex;
+  justify-content: center; /* horizontal center */
+  align-items: center;     /* vertical center */
+  /*overflow: hidden;*/
+}
+
+/* Container to help center the card */
+.login-page {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+
+/* --- Form Card --- */
+.form-card {
+  position: relative;
+  background: #ffffff; /* white card */
+  border-radius: 25px;
+  padding: 3rem 2.5rem; /* slightly wider */
+  width: 380px; /* slightly wider */
+  text-align: center;
+  box-shadow: 
+    0 10px 30px rgba(0,0,0,0.15),
+    inset 0 0 5px rgba(0,0,0,0.05);
+  color: #000000; /* black text */
+  z-index: 1;
+  transition: all 0.5s ease; /* smooth expansion */
+  overflow: hidden;
+}
+
+.login-card-wrapper {
+  display: flex;
+  justify-content: center; /* horizontal center */
+  align-items: center;     /* vertical center */
+  min-height: 100vh;       /* full viewport height */
+  width: 100%;
+}
+
+/* Move card slightly higher when charity field is visible */
+.form-card.shifted {
+  transform: translateY(-20px);
+}
+
+/* --- Header --- */
+.form-header {
+  margin-bottom: 1.5rem;
+}
+
+.logo-icon {
+  font-size: 3rem;
+  color: #FFA500; /* orange basket logo */
+}
+
+.app-title {
+  font-size: 1.8rem;
+  margin: 0.9rem 0 0.5rem 0;
+  color: #000000; /* black title */
+}
+
+.subtitle {
+  margin-top: 0.8rem;
+  font-size: 0.9rem;
+  color: #000000; /* black subtitle */
+}
+
+/* --- Input Fields --- */
+.input-field, select {
+  width: 100%;
+  padding: 0.7rem;
+  margin: 0.5rem 0;
+  border-radius: 12px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+  background-color: #f5f5f5;
+  color: #000;
+  transition: all 0.3s ease;
+}
+
+.input-field::placeholder {
+  color: #888;
+}
+
+/* --- Buttons --- */
+.primary-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.7rem;
+  margin-top: 1rem;
+  border: none;
+  border-radius: 12px;
+  background-color: #FFD700; /* bright yellow */
+  color: #ffffff; /* white text */
+  font-weight: bold;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: 0.3s ease, transform 0.2s ease;
+}
+
+.primary-btn:hover {
+  background-color: #FFC300; /* slightly darker yellow on hover */
+  transform: scale(1.05);
+}
+
+/* --- Links --- */
+.toggle-link {
+  margin-top: 0.8rem;
+  font-size: 0.9rem;
+  background: none;
+  border: none;
+  color: #FFA500;
+  cursor: pointer;
+}
+
+.toggle-link span {
+  text-decoration: underline;
+}
+
+/* --- Floating Food Emojis --- */
+.food-background {
+  position: fixed; /* cover entire page */
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 0; /* behind card */
+}
+
+.food-item {
+  position: absolute;
+  top: 0;
+  animation-name: fall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  will-change: transform;
+  font-size: 60px;
+}
+
+@keyframes fall {
+  0% {
+    top: -10%;
+    opacity: 0;
+  }
+  5% {
+    opacity: 1;
+  }
+  100% {
+    top: 110%;
+    opacity: 1;
+  }
+}
+
+/* --- Charity Container --- */
+.charity-container {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 0.5s ease, opacity 0.5s ease;
+}
+
+.charity-container.visible {
+  max-height: 200px; /* adjust depending on content */
+  opacity: 1;
+  margin-top: 0.5rem;
+}
+
+.charity-prompt {
+  font-size: 0.9rem;
+  color: #333;
+  margin-bottom: 0.3rem;
+}
+
+/* --- Errors / Success --- */
+.error-msg {
+  color: red;
+  margin-top: 0.3rem;
+}
+
+.success-msg {
+  color: green;
+  margin-top: 0.3rem;
+}
+
+/* --- Region Search Dropdown --- */
+.region-search-container {
+  position: relative;
+  width: 100%;
+}
+
+.region-search-input {
+  width: 100%;
+  padding: 0.7rem;
+  margin: 0.5rem 0;
+  border-radius: 12px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+  background-color: #f5f5f5;
+  color: #000;
+}
+
+.region-dropdown {
+  position: absolute;
+  width: 100%;
+  max-height: 120px;
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 12px;
+  z-index: 5;
+  top: 100%;
+  left: 0;
+}
+
+.region-dropdown div {
+  padding: 0.5rem;
+  cursor: pointer;
+}
+
+.region-dropdown div:hover {
+  background-color: #ffd;
+}
+
+
+.password-bar-container {
+  width: 100%;
+  height: 8px;
+  background-color: #e0e0e0;
+  border-radius: 4px;
+  margin-top: 5px;
+}
+
+.password-bar {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s, background-color 0.3s;
+}
+
+.strength-text {
+  font-size: 0.8rem;
+  margin-top: 2px;
+  color: #555;
+}
+
+.password-rules {
+  list-style-type: none;
+  font-size: 0.8rem;
+  padding-left: 0;
+  margin: 5px 0;
+}
+
+.password-rules li {
+  color: #a0a0a0;
+  margin-bottom: 2px;
+}
+
+.password-rules li.valid {
+  color: green;
+  font-weight: bold;
+}
+

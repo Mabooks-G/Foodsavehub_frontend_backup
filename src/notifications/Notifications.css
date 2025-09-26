@@ -1,0 +1,170 @@
+/* =========================
+   Notification container
+   ========================= */
+.notification-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 40px;
+  width: 100%;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* Notification card matches sidebar’s flat style */
+.notification-card {
+  background-color: #ffffff;
+  width: 900px;
+  max-width: 750px;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.notification-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+/* Title aligned with sidebar typography */
+.notification-title {
+  text-align: center;
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 30px;
+  color: #2c3e50;
+}
+
+/* =========================
+   Individual notifications
+   ========================= */
+.notification-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  margin-bottom: 14px;
+  background-color: #fdf6d8; /* light yellow, same family as sidebar */
+  border-radius: 10px;
+  cursor: pointer;
+  width: 100%;
+  transition: transform 0.2s ease, background-color 0.3s ease, box-shadow 0.2s ease;
+}
+
+.notification-item:hover {
+  background-color: #ffe96c; /* same yellow as sidebar */
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.notification-info {
+  flex: 1;
+  margin-right: 12px;
+}
+
+.notification-title-text {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+  color: #34495e;
+  text-align: left;
+}
+
+.notification-meta {
+  font-size: 14px;
+  color: #7f8c8d;
+  margin-top: 4px;
+  text-align: left;
+}
+
+/* =========================
+   Actions & status
+   ========================= */
+.notification-actions {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
+.notification-status {
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  color: white;
+  font-weight: 600;
+  min-width: 50px;
+  text-align: center;
+}
+
+/* Status colors consistent with sidebar’s logout button (red) */
+.status-expired {
+  background-color: #e74c3c;
+}
+
+.status-warning {
+  background-color: #f39c12;
+}
+
+.status-good {
+  background-color: #27ae60;
+}
+
+.red-dot {
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  background: red;
+  border-radius: 50%;
+  margin-left: 6px;
+  box-shadow: 0 0 2px rgba(0,0,0,0.3);
+}
+
+/* =========================
+   Delete/Action buttons
+   ========================= */
+.action-btn {
+  background-color: #ff5c5c; /* match sidebar logout button */
+  color: white;
+  border: none;
+  font-size: 13px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.action-btn:hover {
+  background-color: #e63939; /* same hover red as logout */
+  transform: scale(1.1);
+}
+
+/* =========================
+   Loading container
+   ========================= */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px;
+  color: #555;
+}
+
+.spinner {
+  border: 4px solid #f3f3f3; /* light grey */
+  border-top: 4px solid #ff5c5c; /* match red theme */
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 10px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

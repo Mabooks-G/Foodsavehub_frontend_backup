@@ -1,0 +1,250 @@
+.chat-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: #f3f4f6;
+  font-family: 'Noto Color Emoji', 'Twemoji Mozilla', sans-serif;
+  margin-right: -30px;
+
+}
+
+.chat-header {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  background-color: #fff;
+  border-bottom: 1px solid #ddd;
+}
+
+.chat-header-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 10px;
+  object-fit: cover;
+  font-size: 1.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f3f4f6;
+}
+
+.back-button {
+  padding: 4px 8px;
+  cursor: pointer;
+  margin-right: 10px;
+  background-color: #16a34a;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+}
+
+.back-button:hover {
+  background-color: #15803d;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.user-name {
+  font-weight: bold;
+}
+
+.user-status {
+  font-size: 12px;
+  color: gray;
+  display: flex;
+  align-items: center;
+}
+
+.status-indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 5px;
+}
+
+.status-indicator.online {
+  background-color: #16a34a;
+}
+
+.messages-wrapper {
+  flex: 1;
+  padding: 16px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: #f3f4f6;
+}
+
+/* Green centered date bubble */
+.date-bubble {
+  display: block;
+  margin: 16px auto;
+  font-size: 0.85rem;
+  font-weight: bold;
+  color: #065f46;
+  background: rgba(22, 163, 74, 0.2);
+  padding: 6px 12px;
+  border-radius: 20px;
+  text-align: center;
+}
+
+.message-row {
+  display: flex;
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.message-row.sent {
+  justify-content: flex-end;
+}
+
+.message-row.received {
+  justify-content: flex-start;
+}
+
+.message-bubble {
+  max-width: 48%;
+  padding: 10px 15px;
+  border-radius: 20px;
+  background-color: #fff;
+  word-break: break-word;
+  position: relative;
+}
+
+.message-row.sent .message-bubble {
+  background-color: #e5e5e5;
+}
+
+/* Timestamp */
+.message-time {
+  font-size: 10px;
+  color: rgba(22, 163, 74, 0.7);
+  margin-left: 5px;
+  /* margin-top: auto; */
+  align-self: flex-end;
+}
+
+/* Typing indicator */
+.message-bubble.typing {
+  display: flex;
+  gap: 4px;
+}
+
+.message-bubble.typing span {
+  width: 6px;
+  height: 6px;
+  background: #aaa;
+  border-radius: 50%;
+  animation: typing 1s infinite;
+}
+
+.message-bubble.typing span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.message-bubble.typing span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes typing {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  30% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
+}
+
+.message-input-container {
+  display: flex;
+  padding: 10px;
+  border-top: 1px solid #ddd;
+  width: 100%; /* fixed to page width */
+  box-sizing: border-box; /* include padding in width */
+  background-color: #fff;
+}
+
+.message-input-container textarea {
+  flex: 1;
+  padding: 10px;
+  resize: none;
+  border-radius: 25px;
+  border: 1px solid #ccc;
+  margin-right: 8px;
+  line-height: 1.4;
+  min-height: 2.5rem;
+  max-height: 6rem; /* prevents excessive expansion */
+  overflow-y: auto; /* scroll if too long */
+  white-space: pre-wrap; /* wrap text */
+}
+
+.send-button {
+  padding: 0 16px;
+  border-radius: 20px;
+  border: none;
+  background-color: #16a34a;
+  color: #fff;
+  cursor: pointer;
+}
+
+.send-button:hover {
+  background-color: #15803d;
+}
+
+/* Read receipt ticks */
+.read-receipt {
+  position: absolute;
+  bottom: 0.5px;   /* distance from bottom of bubble */
+  right: 8px;    /* distance from right edge */
+  font-size: 0.70rem;
+  color:  gray;
+}
+
+.read-receipt.delivered {
+  color: gray; /* double gray ticks */
+}
+.read-receipt.read {
+  color: #16a34a;
+}
+
+.scroll-to-bottom-btn {
+  position: fixed;
+  bottom: 80px;
+  right: 20px;
+  background-color: #ccc;
+  color: white;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  border: none;
+  cursor: pointer;
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.scroll-to-bottom-btn.pressed {
+  background-color: #28a745; /* green */
+}
+
+.unread-count-badge {
+  background-color: red;
+  color: white;
+  font-size: 0.7rem;
+  border-radius: 50%;
+    padding: 2px 6px;
+  margin-left: 4px;
+}
+ 
+

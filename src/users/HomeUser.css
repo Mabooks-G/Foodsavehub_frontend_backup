@@ -1,0 +1,505 @@
+/* ===============================
+   General page & scrolling
+   =============================== */
+html, body {
+  height: 100%;
+  margin: 0;
+  background: #ffffff; /* white page background */
+  font-family: Arial, sans-serif;
+  overflow-y: auto; /* fully native scrolling on the right */
+}
+
+/* Container holding everything */
+.table-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* ===============================
+   Header – now scrolls naturally
+   =============================== */
+.sticky-header {
+  position: relative;  /* no sticky */
+  top: auto;
+  z-index: auto;
+  background: #ffffff;
+  padding: 1rem 1.5rem;
+  border-radius: 0 0 16px 16px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+
+/* Table title */
+.table-title {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #333;
+  text-align: center;
+}
+
+/* Filter container */
+.filter-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 0.75rem;
+  gap: 0.5rem;
+}
+
+.filter-container label {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.filter-container select {
+  padding: 0.4rem 0.6rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 0.9rem;
+  background: #f9f9f9;
+  transition: border 0.2s ease, box-shadow 0.2s ease;
+}
+
+.filter-container select:focus {
+  border-color: #3b82f6;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(59,130,246,0.2);
+}
+
+/* ===============================
+   Food cards grid
+   =============================== */
+.mobile-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+  justify-items: start; /* slightly to the right, not centered */
+}
+
+/* Force 4–5 cards per row on larger screens */
+@media (min-width: 1024px) {
+  .mobile-cards {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (min-width: 1440px) {
+  .mobile-cards {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+/* ===============================
+   Card styling
+   =============================== */
+.food-card {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+  padding: 1rem;
+  width: 100%;
+  max-width: 270px;
+  min-height: 280px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.25s ease;
+}
+
+/* Expand only the card being edited */
+.food-card.editing {
+  min-height: auto;
+  padding-bottom: 1.2rem;
+}
+
+/* Hover effect */
+.food-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+}
+
+/* Expiry colors */
+.food-card.expired { background-color: #f4cccc !important; }
+.food-card.expiring-soon { background-color: #fff2cc !important; }
+.food-card.expiring-week { background-color: #d9ead3 !important; }
+.food-card.fresh { background-color: #ffffff !important; }
+
+/* ===============================
+   Card content
+   =============================== */
+.card-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.6rem;
+}
+
+.card-row label {
+  font-weight: bold;
+  flex: 1;
+  min-width: 80px;
+}
+
+.card-row input,
+.card-row select {
+  flex: 2;
+  padding: 0.5rem 0.8rem;
+  border-radius: 12px;
+  border: 1px solid #d1d5db;
+  font-size: 0.9rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.card-row input:focus,
+.card-row select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59,130,246,0.2);
+}
+
+/* ===============================
+   Buttons
+   =============================== */
+.btn {
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  border-radius: 12px;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.btn:hover { transform: translateY(-1px); }
+.btn:active { transform: translateY(0); }
+
+.btn-green { background-color: #10b981; color: white; }
+.btn-green:hover { background-color: #059669; }
+
+.btn-orange { background-color: #f59e0b; color: white; }
+.btn-orange:hover { background-color: #d97706; }
+
+.btn-red { background-color: #ef4444; color: white; }
+.btn-red:hover { background-color: #dc2626; }
+
+.btn-gray { background-color: #9ca3af; color: white; }
+.btn-gray:hover { background-color: #6b7280; }
+
+/* ===============================
+   Add button
+   =============================== */
+.add-btn-container {
+  margin: 2rem 0;
+  text-align: center;
+}
+
+/* ===============================
+   Responsive tweaks for mobile
+   =============================== */
+@media (max-width: 480px) {
+  .mobile-cards {
+    justify-items: end;   /* move cards more to the right */
+    grid-template-columns: 1fr;  /* single column for mobile */
+    gap: 1rem;
+    margin-top: 1.5rem;  /* extra space below header so first cards are visible */
+  }
+
+  .mobile-cards {
+    justify-items: end;   /* move cards more to the right */
+    grid-template-columns: 1fr;  /* single column for mobile */
+    gap: 1rem;
+  }
+
+  .card-row label,
+  .card-row input,
+  .card-row select {
+    font-size: 0.85rem;
+  }
+
+  .card-row .btn {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.8rem;
+  }
+
+  /* Header slightly higher and right-aligned */
+  .sticky-header {
+    padding: 0.8rem 1rem;
+    border-radius: 0 0 12px 12px;
+    text-align: right;
+  }
+}
+
+/* ===============================
+   Add Food Item Form Styling
+   =============================== */
+
+.table-form-container {
+  max-width: 500px;
+  margin: 2rem auto;
+  background: #ffffff;
+  padding: 1.5rem 2rem;
+  border-radius: 18px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+  font-family: Arial, sans-serif;
+}
+
+.table-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: #333;
+}
+
+.form-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 0.8rem;
+}
+
+.form-table td {
+  vertical-align: middle;
+  padding: 0.25rem 0.5rem;
+}
+
+.form-table td:first-child {
+  font-weight: bold;
+  width: 40%;
+  color: #555;
+}
+
+.form-table input,
+.form-table select {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border-radius: 12px;
+  border: 1px solid #d1d5db;
+  font-size: 0.95rem;
+  box-sizing: border-box;
+  transition: border 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-table input:focus,
+.form-table select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59,130,246,0.2);
+}
+
+.error-msg {
+  color: #ef4444;
+  font-weight: 600;
+  margin-top: 0.8rem;
+}
+
+.success-msg {
+  color: #10b981;
+  font-weight: 600;
+  margin-top: 0.8rem;
+}
+
+.form-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1.5rem;
+  gap: 0.8rem;
+}
+
+.form-buttons .btn {
+  flex: 1;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  padding: 0.55rem 1rem;
+}
+
+/* ===============================
+   Responsive tweaks
+   =============================== */
+@media (max-width: 480px) {
+  .table-form-container {
+    margin: 1rem;
+    padding: 1rem 1.2rem;
+    border-radius: 14px;
+  }
+
+  .form-table td:first-child {
+    font-size: 0.75rem;
+  }
+
+  .form-table input,
+  .form-table select {
+    font-size: 0.85rem;
+    padding: 0.45rem 0.6rem;
+  }
+
+  .form-buttons {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .form-buttons .btn {
+    font-size: 0.85rem;
+    padding: 0.5rem 0.75rem;
+  }
+}
+
+.main-content {
+  transition: margin-left 0.3s ease;
+  margin-left: 60px; /* default collapsed navbar width */
+  padding: 1rem;
+}
+
+.main-content.expanded {
+  margin-left: 220px; /* match expanded navbar width */
+}
+
+.app-container {
+  display: flex;
+  transition: all 0.3s ease;
+}
+
+.app-container .main-content {
+  flex: 1;
+  transition: margin-left 0.3s ease;
+  margin-left: 60px; /* collapsed sidebar width */
+}
+
+.app-container.expanded .main-content {
+  margin-left: 220px; /* expanded sidebar width */
+}
+
+/* Main content container */
+.main-content {
+  padding: 1rem;
+  max-width: calc(100% - 60px); /* collapsed sidebar default width */
+  margin-left: 60px;           /* match collapsed sidebar */
+  transition: margin-left 0.3s ease, max-width 0.3s ease;
+}
+
+/* Expanded sidebar */
+.main-content.expanded {
+  margin-left: 220px;          /* push right for full sidebar */
+  max-width: calc(100% - 220px);
+}
+
+/* Optional: keep content centered on large screens */
+@media (min-width: 1024px) {
+  .main-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .mobile-cards {
+    justify-content: center;
+  }
+}
+
+/* Cards and headers keep their current styling */
+.sticky-header {
+  width: 100%;
+  max-width: 1200px; /* optional for centering */
+  margin-bottom: 1rem;
+}
+
+.mobile-cards {
+  width: 100%;
+  max-width: 1200px; /* optional for centering */
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.profile-page {
+  display: flex;
+  justify-content: center;
+  margin-top: 50px;
+  font-family: Arial, sans-serif;
+}
+
+.profile-card {
+  width: 400px;
+  padding: 25px;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.profile-row {
+  margin-bottom: 15px;
+  display: flex;
+  flex-direction: column;
+}
+
+.profile-row label {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.profile-row span {
+  padding: 8px 10px;
+  background-color: #f5f5f5;
+  border-radius: 6px;
+}
+
+.input-field {
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.region-search-container {
+  position: relative;
+}
+
+.region-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  max-height: 120px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  background: #fff;
+  z-index: 10;
+  border-radius: 6px;
+}
+
+.region-option {
+  padding: 8px 10px;
+  cursor: pointer;
+}
+
+.region-option:hover {
+  background-color: #e0e0e0;
+}
+
+.profile-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.btn {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn-save { background-color: #4caf50; color: #fff; }
+.btn-cancel { background-color: #f44336; color: #fff; }
+.btn-edit { background-color: #2196f3; color: #fff; }
+.btn-logout { background-color: #757575; color: #fff; }
+
+.profile-message {
+  margin-top: 15px;
+  font-weight: bold;
+  color: #d32f2f;
+}
+

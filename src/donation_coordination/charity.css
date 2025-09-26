@@ -1,0 +1,508 @@
+/* Base */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+  background-color: #f9fafb;
+  color: #111827;
+}
+
+/* Section Titles */
+#donations-title {
+  font-size: 2rem;
+  text-align: center;
+  margin: 1.5rem 0 0.5rem 0;
+  margin-top: 2rem;
+}
+
+/* Subtitle below title */
+p {
+  font-size: 1rem;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  margin-top: 2rem;
+  color: #4b5563; /* soft gray */
+}
+
+/* Donation status messages */
+.donation-status p {
+  font-size: 0.95rem;
+  margin-bottom: 8px;
+  color: #374151;
+}
+
+/* Search bar */
+.search-bar {
+  margin-bottom: 20px; /* more space between search and list */
+}
+
+.search-bar input {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 20px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+}
+
+/* Offer/charity items */
+.offer-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 15px;
+  margin-bottom: 12px;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+}
+
+.green-bg {
+  background-color: #e6f7e6;
+}
+
+.white-bg {
+  background-color: #ffffff;
+}
+
+/* Offer details */
+.offer-details h4 {
+  margin: 0 0 5px 0;
+  font-size: 1.15rem;
+  font-weight: bold;
+}
+
+.offer-details p {
+  margin: 2px 0;
+  font-size: 0.95rem;
+  color: #374151;
+}
+
+/* Buttons */
+.offer-actions {
+  display: flex;
+  gap: 10px;
+}
+
+/* Donate button - green with white text */
+.btn-donate {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  background-color: #28a745;
+  color: #ffffff;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-donate:hover {
+  background-color: #218838;
+}
+
+/* Responsive spacing above the list */
+#foodbanks-list {
+  margin-top: 15px;
+}
+
+/* Adjust spacing for smaller screens */
+@media (max-width: 600px) {
+  .offer-item {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 15px 10px;
+  }
+
+  .offer-actions {
+    margin-top: 10px;
+    width: 100%;
+  }
+
+  .btn-donate {
+    width: 100%;
+  }
+}
+
+.offer-details p {
+  margin: 4px 0 0 0;   /* 4px top, 0 for right, bottom, left */
+  padding: 0;
+  font-size: 0.95rem;
+  color: #374151;
+}
+
+/* Container for the whole page */
+.offer-container,
+#foodbanks-list {
+  margin: 20px auto;
+  padding: 20px;
+  max-width: 600px;
+  border-radius: 12px;
+  background-color: #fff;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+}
+
+/* Headings */
+h2, h3 {
+  text-align: center;
+  margin-bottom: 12px;
+  margin-top: 13px;
+  font-family: Arial, Helvetica, sans-serif;
+  color: #111827;
+}
+
+h4 {
+  margin: 0 0 6px 0;
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #111827;
+}
+
+/* Paragraphs under headings */
+.offer-details p,
+.donation-status p {
+  margin: 2px 0 0 0;
+  padding: 0;
+  font-size: 0.95rem;
+  color: #374151;
+}
+
+/* Search bar styling */
+.search-bar {
+  margin: 15px 0;
+}
+
+.search-bar input {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 20px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+}
+
+/* Offers / Charities list items */
+.offer-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  margin-bottom: 12px;
+  border-radius: 8px;
+}
+
+.green-bg {
+  background-color: #e6f7e6; /* light green */
+}
+
+.white-bg {
+  background-color: #ffffff;
+}
+
+/* Offer details container */
+.offer-details {
+  flex: 1;
+  margin-right: 12px; /* spacing between text and button */
+}
+
+/* Buttons styling */
+.offer-actions .btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+/* Donate / Offer Donation buttons: green with white text */
+.btn-donate {
+  background-color: #28a745;
+  color: #fff;
+}
+
+.btn-donate:hover {
+  background-color: #218838;
+}
+
+/* Donation status messages */
+.donation-status {
+  margin-top: 10px;
+  margin-bottom: 15px;
+}
+
+.donation-status p {
+  font-size: 0.95rem;
+  color: #111827;
+  margin-bottom: 5px;
+}
+
+/* Offer details container */
+.offer-details {
+  flex: 1;                  /* take up remaining space */
+  margin: 0;                /* reset margin */
+  padding-right: 12px;      /* spacing between text and button */
+}
+
+/* Headings inside offer-details */
+.offer-details h4 {
+  margin: 0 0 6px 0;       /* no left indent, small bottom margin */
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #111827;
+}
+
+/* Paragraphs (region/city) */
+.offer-details p {
+  margin: 0;               /* reset all margins to remove weird indentation */
+  padding: 0;
+  font-size: 0.95rem;
+  color: #374151;
+  text-align: left;        /* force left alignment */
+}
+
+
+/* Container for all offers */
+.offer-container,
+#foodbanks-list {
+  margin-top: 20px;
+  padding: 10px;
+}
+
+/* Headings */
+#donations-title {
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+
+p {
+  margin-bottom: 12px;
+  font-size: 1rem;
+}
+
+/* Search bar */
+.search-bar {
+  width: 100%;            /* full width of parent */
+  margin-bottom: 20px;    /* space below the search bar */
+}
+
+.search-bar input {
+  width: 100%;            /* full width */
+  padding: 10px 15px;
+  font-size: 1rem;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  box-sizing: border-box;
+}
+
+/* Offer items (cards) */
+.offer-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  margin-bottom: 10px;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.green-bg {
+  background-color: #e6f7e6;
+}
+
+.white-bg {
+  background-color: #ffffff;
+}
+
+/* Offer details */
+.offer-details {
+  flex: 1;
+}
+
+.offer-details h4 {
+  margin: 0 0 5px 0;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.offer-details p {
+  margin: 2px 0;
+  font-size: 14px;
+  padding-left: 0;  /* remove any accidental indentation */
+}
+
+/* Buttons */
+.offer-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.btn {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.btn-donate {
+  background-color: #28a745; /* green */
+  color: #ffffff; /* white text */
+}
+
+/* Donation status messages */
+.donation-status p {
+  margin-bottom: 8px;
+  font-size: 0.95rem;
+}
+
+
+/* Container for the grocery list page */
+.grocery-container {
+  max-width: 600px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: #fefefe;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  font-family: 'Inter', Helvetica, Arial, sans-serif;
+}
+
+/* Back button */
+.back-btn {
+  background-color: transparent;
+  border: none;
+  color: #333;
+  font-size: 1em;
+  cursor: pointer;
+  margin-bottom: 15px;
+  transition: color 0.2s;
+}
+.back-btn:hover {
+  color: #007B00; /* green hover */
+}
+
+/* Headings */
+.grocery-container h3 {
+  margin-bottom: 7px;
+  font-weight: 700;
+}
+.grocery-container p {
+  margin-bottom: 17px;
+  font-size: 0.95em;
+}
+
+/* Food list card */
+.food-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 15px;
+  border-radius: 12px;
+  background-color: #ffffff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  margin-bottom: 20px;
+}
+
+/* Individual food item */
+.food-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.95em;
+  cursor: pointer;
+  padding: 6px 8px;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+.food-item:hover {
+  background-color: #f1f7f1; /* subtle green hover */
+}
+
+/* Checkbox alignment */
+.food-item input[type="checkbox"] {
+  transform: scale(1.1);
+  cursor: pointer;
+}
+
+/* Send donation button */
+.btn-send {
+  background-color: #28a745; /* vibrant green */
+  color: #fff;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 1em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  width: 100%; /* full width like the card */
+}
+.btn-send:hover {
+  background-color: #218838;
+}
+
+/* Error message */
+.grocery-container p {
+  color: #d9534f; /* red for errors */
+}
+
+/* Optional: make the expiry text consistent */
+.food-item span {
+  font-style: italic;
+  color: #666;
+}
+
+
+.inline-notification {
+  display: inline-block;
+  padding: 6px 12px;
+  margin-bottom: 12px;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 0.95em;
+}
+
+.inline-notification {
+  text-align: center;
+  margin: 1em 0;
+}
+
+/* Colors for success and warning messages */
+.inline-notification.success {
+  color: green;
+}
+
+.inline-notification.warning {
+  color: red;
+}
+
+/* Accept and Decline buttons */
+.btn-accept {
+  background-color: green;
+  color: white;
+  border: none;
+  padding: 0.5em 1em;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn-accept:hover {
+  background-color: darkgreen;
+}
+
+.btn-decline {
+  background-color: #c73535;;
+  color: white;
+  border: none;
+  padding: 0.5em 1em;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn-decline:hover {
+  background-color: darkred;
+}
