@@ -2,7 +2,6 @@ import { useState, useEffect, useMemo } from "react";
 import axios from "axios";
 import '../auth.css';
 
-
 const API_BACKEND = process.env.REACT_APP_API_BACKEND;
 
 const foodEmojis = [
@@ -36,11 +35,10 @@ const regions = [
   "Pietermaritzburg, KwaZulu-Natal"
 ];
 
-
 export default function LoginForm({ onLogin }) {
   const [step, setStep] = useState("login"); // login | otp-email | otp-verify | register
   const [form, setForm] = useState({
-    email: "", password: "", name: "", accountType: "Household/Individual", region: "", capacity: ""
+    email: "", password: "", confirmPassword: "", name: "", accountType: "Household/Individual", region: "", capacity: ""
   });
   const [otp, setOtp] = useState("");
   const [error, setError] = useState("");
@@ -52,6 +50,7 @@ export default function LoginForm({ onLogin }) {
   const [isOtpVerified, setIsOtpVerified] = useState(false);
   const [passwordStrengthScore, setPasswordStrengthScore] = useState(0);
   const [passwordError, setPasswordError] = useState("");
+  const [changePasswordMode, setChangePasswordMode] = useState(false);
 
   // ===== Effects =====
   useEffect(() => {
@@ -90,12 +89,10 @@ export default function LoginForm({ onLogin }) {
       /[@$!%*?&^#()\-_=+{}[\]|;:"<>,./?]/.test(pwd)
     ];
 
-    const score = rules.filter(Boolean).length; // 0 to 5
+    const score = rules.filter(Boolean).length;
     setPasswordStrengthScore(score);
-
-    const valid = score === rules.length;
-    setPasswordError(valid ? "" : "Password must meet all requirements.");
-    return valid;
+    setPasswordError(score === rules.length ? "" : "Password must meet all requirements.");
+    return score === rules.length;
   };
 
   // ===== Auth Functions =====
@@ -114,7 +111,7 @@ export default function LoginForm({ onLogin }) {
   const requestOtp = async () => {
     try {
       const res = await axios.post(`${API_BACKEND}/api/auth/request-otp`, { email: form.email });
-      setSuccess("OTP sent! Check your email.");
+      setSuccess("OTP sent! Check your email (spam).");
       setStep("otp-verify");
       setResendCooldown(30);
     } catch (err) {
@@ -126,7 +123,7 @@ export default function LoginForm({ onLogin }) {
     try {
       const res = await axios.post(`${API_BACKEND}/api/auth/verify-otp`, { email: form.email, otp });
       setSuccess(res.data.message || "OTP verified successfully!");
-      setStep("register");
+      setStep(changePasswordMode ? "change-password" : "register");
       setIsOtpVerified(true);
     } catch (err) {
       setError(err.response?.data?.error || "OTP verification failed");
@@ -157,13 +154,46 @@ export default function LoginForm({ onLogin }) {
     }
   };
 
+  const handleChangePassword = async () => {
+    if (form.password !== form.confirmPassword) {
+      console.warn("Password update blocked: passwords do not match.");
+      setError("Passwords do not match.");
+      return;
+    }
+
+    if (!checkPasswordStrength(form.password)) {
+      console.warn("Password update blocked: password does not meet security requirements.");
+      setError("Password is not secure enough. Please follow the password rules.");
+      return;
+    }
+
+    try {
+      const res = await axios.put(`${API_BACKEND}/api/profile/update`, {
+        email: form.email,
+        newPassword: form.password
+      });
+
+      console.log("Password updated successfully for:", form.email);
+      setSuccess(res.data.message || "Password updated successfully!");
+      setStep("login");
+      setChangePasswordMode(false);
+      setForm(prev => ({ ...prev, password: "", confirmPassword: "" }));
+      setOtp("");
+    } catch (err) {
+      console.error("Failed to update password for:", form.email, err);
+      setError(err.response?.data?.error || "Failed to update password");
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(""); setSuccess("");
+
     if (step === "login") handleLogin();
     else if (step === "otp-email") requestOtp();
     else if (step === "otp-verify") verifyOtp();
     else if (step === "register") registerUser();
+    else if (step === "change-password") handleChangePassword();
   };
 
   const handleResend = () => {
@@ -187,7 +217,6 @@ export default function LoginForm({ onLogin }) {
     });
   }, []);
 
-  // ===== Render =====
   return (
     <div className="login-page">
       <div className="food-background">{emojiSpans}</div>
@@ -200,12 +229,14 @@ export default function LoginForm({ onLogin }) {
               {step === "otp-email" && "Sign Up - Enter Email"}
               {step === "otp-verify" && "Enter OTP"}
               {step === "register" && "Complete Registration"}
+              {step === "change-password" && "Change Password"}
             </h1>
             <p className="subtitle">
               {step === "login" && <em>Recreate, Donate, and Reduce Food Waste</em>}
               {step === "otp-email" && "Enter your email to receive OTP"}
               {step === "otp-verify" && "Check your email for the OTP"}
               {step === "register" && <em>Fill in your details to complete registration</em>}
+              {step === "change-password" && "Enter and confirm your new password"}
             </p>
           </div>
 
@@ -213,6 +244,7 @@ export default function LoginForm({ onLogin }) {
           {step === "login" && <>
             <input type="email" name="email" placeholder="Email" value={form.email} onChange={handleChange} className="input-field" required />
             <input type="password" name="password" placeholder="Password" value={form.password} onChange={handleChange} className="input-field" required />
+            <button type="button" className="toggle-link" onClick={() => { setStep("otp-email"); setChangePasswordMode(true); }}>Forgot Password?</button>
           </>}
 
           {step === "otp-email" && <>
@@ -226,15 +258,26 @@ export default function LoginForm({ onLogin }) {
             </button>
           </>}
 
-          {step === "register" && <>
-            <select name="accountType" value={form.accountType} onChange={handleChange} className="input-field">
-              <option>Household/Individual</option>
-              <option>Business/Corporate</option>
-              <option>Charity/Foodbank</option>
-            </select>
-            <input type="text" name="name" placeholder="Name" value={form.name} onChange={handleChange} className="input-field" required />
+          {(step === "register" || step === "change-password") && <>
+            {step === "register" && <>
+              <select name="accountType" value={form.accountType} onChange={handleChange} className="input-field">
+                <option>Household/Individual</option>
+                <option>Business/Corporate</option>
+                <option>Charity/Foodbank</option>
+              </select>
+              <input type="text" name="name" placeholder="Name" value={form.name} onChange={handleChange} className="input-field" required />
+              <div className="region-search-container">
+                <input type="text" placeholder="Search Region..." value={regionSearch} 
+                       onChange={(e)=>{setRegionSearch(e.target.value); setForm(prev=>({...prev, region:e.target.value})); setShowDropdown(true)}} 
+                       onFocus={()=>setShowDropdown(true)} onBlur={()=>setTimeout(()=>setShowDropdown(false),1000)} className="region-search-input"/>
+                {showDropdown && filteredRegions.length>0 && <div className="region-dropdown">{filteredRegions.map((r,i)=><div key={i} className="region-option" onClick={()=>handleRegionSelect(r)}>{r}</div>)}</div>}
+              </div>
+              {form.accountType==="Charity/Foodbank" && <input type="number" name="capacity" placeholder="Capacity" value={form.capacity} min="0" onChange={handleChange} className="input-field" required />}
+            </>}
+
             <input type="password" name="password" placeholder="Password" value={form.password} onChange={handleChange} className="input-field" required />
-            
+            <input type="password" name="confirmPassword" placeholder="Confirm Password" value={form.confirmPassword || ""} onChange={handleChange} className="input-field" required />
+
             {/* Password Strength Bar */}
             <div className="password-bar-container">
               <div className="password-bar" style={{
@@ -249,7 +292,7 @@ export default function LoginForm({ onLogin }) {
               {passwordStrengthScore === 5 && "Strong"}
             </p>
 
-            {/* Optional: Password Rules Checklist */}
+            {/* Password Rules */}
             <ul className="password-rules">
               <li className={form.password.length >= 8 ? "valid" : ""}>Minimum 8 characters</li>
               <li className={/[a-z]/.test(form.password) ? "valid" : ""}>Lowercase letter</li>
@@ -257,14 +300,6 @@ export default function LoginForm({ onLogin }) {
               <li className={/\d/.test(form.password) ? "valid" : ""}>Number</li>
               <li className={/[@$!%*?&^#()\-_=+{}[\]|;:"<>,./?]/.test(form.password) ? "valid" : ""}>Special character</li>
             </ul>
-
-            <div className="region-search-container">
-              <input type="text" placeholder="Search Region..." value={regionSearch} 
-                     onChange={(e)=>{setRegionSearch(e.target.value); setForm(prev=>({...prev, region:e.target.value})); setShowDropdown(true)}} 
-                     onFocus={()=>setShowDropdown(true)} onBlur={()=>setTimeout(()=>setShowDropdown(false),1000)} className="region-search-input"/>
-              {showDropdown && filteredRegions.length>0 && <div className="region-dropdown">{filteredRegions.map((r,i)=><div key={i} className="region-option" onClick={()=>handleRegionSelect(r)}>{r}</div>)}</div>}
-            </div>
-            {form.accountType==="Charity/Foodbank" && <input type="number" name="capacity" placeholder="Capacity" value={form.capacity} min="0" onChange={handleChange} className="input-field" required />}
           </>}
 
           {error && <p className="error-msg">{error}</p>}
@@ -275,12 +310,14 @@ export default function LoginForm({ onLogin }) {
             {step==="otp-email" && "Request OTP"}
             {step==="otp-verify" && "Verify OTP"}
             {step==="register" && "Complete Registration"}
+            {step==="change-password" && "Update Password"}
           </button>
 
           {step==="login" && <button type="button" className="toggle-link" onClick={()=>setStep("otp-email")}>Don't have an account? Sign Up</button>}
-          {(step==="otp-email" || step==="otp-verify" || step==="register") && <button type="button" className="toggle-link" onClick={()=>setStep("login")}>Back to Login</button>}
+          {(step==="otp-email" || step==="otp-verify" || step==="register" || step==="change-password") && <button type="button" className="toggle-link" onClick={()=>setStep("login")}>Back to Login</button>}
         </form>
       </div>
     </div>
   );
 }
+
