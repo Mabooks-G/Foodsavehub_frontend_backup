@@ -98,7 +98,7 @@ export default function LoginForm({ onLogin }) {
     return valid;
   };
 
-  // ===== Auth Functions =====
+  // ===== Auth Functions ======
   const handleLogin = async () => {
     try {
       const res = await axios.post(`${API_BACKEND}/api/auth/login`, { email: form.email, password: form.password });
