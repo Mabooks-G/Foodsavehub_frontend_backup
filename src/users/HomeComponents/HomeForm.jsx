@@ -1,7 +1,4 @@
 
-
-
-
 /* Author: Bethlehem Shimelis
    Event: Sprint 1: Add Food Item Form (manual input, expiry etc)
    LatestUpdate: added validation, posts to backend, handles success + error msgs
