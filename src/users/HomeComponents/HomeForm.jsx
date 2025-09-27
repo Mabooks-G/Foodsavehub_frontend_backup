@@ -139,7 +139,7 @@ export default function HomeForm({ currentUser, onClose, onRefresh }) {
               </td>
             </tr>
 
-            {/* measure per unit + unit */}
+            {/* measure per unit + unit. */}
             <tr>
               <td>Measure per Unit:</td>
               <td>
