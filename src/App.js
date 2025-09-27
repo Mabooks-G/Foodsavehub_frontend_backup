@@ -12,6 +12,7 @@ import Login from './auth/LoginSignup';
 import Home from './users/HomeUser';
 import User from './users/User';
 import Communication from './communication/Communication';
+import Scan from './users/Scan';
 import Donations from './donation_coordination/Donations';
 import Donor from './donation_coordination/donor';
 import GroceryList from './donation_coordination/grocerylist';
@@ -169,6 +170,7 @@ renderSidebar() {
                   <span className="notification-badge">{donationsNotifications}</span>
                 )}
               </Link>
+              <Route path="/Scan" element={<Scan currentUser={currentUser} />} />
               <Link to="/recipes">🍲 <span className="label">Recipes</span></Link>
               <Link to="/waste">♻️ <span className="label">Waste Analysis</span></Link>
               <Link to="/notifications" className="notification-link">

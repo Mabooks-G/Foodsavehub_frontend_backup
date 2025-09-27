@@ -1,3 +1,7 @@
+
+
+
+
 /* Author: Bethlehem Shimelis
    Event: Sprint 1: Add Food Item Form (manual input, expiry etc)
    LatestUpdate: added validation, posts to backend, handles success + error msgs
@@ -7,13 +11,16 @@
    Returns: triggers dashboard refresh, shows messages, resets form
 */
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import "../HomeUser.css";
 const API_BACKEND = process.env.REACT_APP_API_BACKEND;
 
 export default function HomeForm({ currentUser, onClose, onRefresh }) {
-  
+  const navigate = useNavigate();
+  const location = useLocation(); // capture state passed from Scan.js
+
   // --- state stuff ---
   const [form, setForm] = useState({
     name: "",
@@ -25,6 +32,17 @@ export default function HomeForm({ currentUser, onClose, onRefresh }) {
   });
   const [error, setError] = useState(""); // show error msgs
   const [success, setSuccess] = useState(""); // show success msgs
+
+  //  Autofill from Scan.js
+  useEffect(() => {
+    if (location.state?.scannedData) {
+      setForm((prev) => ({
+        ...prev,
+        name: location.state.scannedData, // prefill Name field
+        // later you can also parse and set category here
+      }));
+    }
+  }, [location.state]);
 
   // dropdown options
   const foodCategories = [
@@ -76,6 +94,10 @@ export default function HomeForm({ currentUser, onClose, onRefresh }) {
       console.error(err);
       setError(err.response?.data?.error || "Failed to add food item"); // show error
     }
+  };
+
+  const handleScanClick = () => {
+    navigate("/Scan"); // navigate to Scan.js page
   };
 
   // --- UI render ---
@@ -152,6 +174,7 @@ export default function HomeForm({ currentUser, onClose, onRefresh }) {
         {/* buttons */}
         <div className="form-buttons add-btn-container">
           <button type="submit" className="btn btn-green">Add Item</button>
+          <button type="button" className="btn btn-green" onClick={handleScanClick}>Scan Item</button>
           <button type="button" className="btn btn-green" onClick={onClose}>Back to Inventory</button>
         </div>
       </form>
