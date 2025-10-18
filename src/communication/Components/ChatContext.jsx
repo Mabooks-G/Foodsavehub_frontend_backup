@@ -6,7 +6,6 @@ import {
   updateChatHistory,
   markDelivered as markDeliveredService
 } from '../services/chatServices';
-// import { io } from 'socket.io-client'; // COMMENT OUT FOR NOW
 
 /* Author: Lethabo Mazui
    Event: Sprint 1
@@ -15,14 +14,115 @@ import {
 */
 const ChatContext = createContext();
 
-// ... (keep all your existing helper functions: bufToBase64, base64ToBuf, encryptWithKey, deriveKey, decryptMessage)
+// Encryption helper functions
+const bufToBase64 = (buffer) => btoa(String.fromCharCode(...new Uint8Array(buffer)));
+const base64ToBuf = (b64) => Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+
+// Derive encryption key from donationId
+const deriveKey = async (donationId) => {
+  const encoder = new TextEncoder();
+  const keyMaterial = await crypto.subtle.importKey(
+    'raw',
+    encoder.encode(donationId.padEnd(32, '0').slice(0, 32)),
+    'PBKDF2',
+    false,
+    ['deriveKey']
+  );
+  
+  return crypto.subtle.deriveKey(
+    {
+      name: 'PBKDF2',
+      salt: encoder.encode('foodsave-chat-salt'),
+      iterations: 100000,
+      hash: 'SHA-256'
+    },
+    keyMaterial,
+    { name: 'AES-GCM', length: 256 },
+    false,
+    ['encrypt', 'decrypt']
+  );
+};
+
+// Encrypt message with derived key
+const encryptWithKey = async (key, plaintext) => {
+  const encoder = new TextEncoder();
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ciphertext = await crypto.subtle.encrypt(
+    { name: 'AES-GCM', iv },
+    key,
+    encoder.encode(plaintext)
+  );
+  
+  return {
+    ciphertextB64: bufToBase64(ciphertext),
+    ivB64: bufToBase64(iv)
+  };
+};
+
+// Decrypt message
+const decryptMessage = async (msg) => {
+  try {
+    // If message is already decrypted or is empty, return as-is
+    if (!msg.chathistory || msg.chathistory.trim() === '') {
+      return {
+        ...msg,
+        decryptedText: msg.chathistory || ''
+      };
+    }
+
+    // Try to decrypt if we have both ciphertext and IV
+    if (msg.chathistory && msg.iv) {
+      try {
+        const key = await deriveKey(msg.donationid);
+        const ciphertextBuf = base64ToBuf(msg.chathistory);
+        const ivBuf = base64ToBuf(msg.iv);
+        
+        const decrypted = await crypto.subtle.decrypt(
+          { name: 'AES-GCM', iv: ivBuf },
+          key,
+          ciphertextBuf
+        );
+        
+        const decoder = new TextDecoder();
+        const decryptedText = decoder.decode(decrypted);
+        
+        return {
+          ...msg,
+          decryptedText
+        };
+      } catch (decryptError) {
+        console.warn('Decryption failed, returning ciphertext:', decryptError);
+        // If decryption fails, return the original ciphertext
+        return {
+          ...msg,
+          decryptedText: msg.chathistory
+        };
+      }
+    }
+    
+    // If no IV or not encrypted, return as-is
+    return {
+      ...msg,
+      decryptedText: msg.chathistory
+    };
+  } catch (error) {
+    console.error('Error in decryptMessage:', error);
+    return {
+      ...msg,
+      decryptedText: msg.chathistory || '[Unable to decrypt message]'
+    };
+  }
+};
+
+// Create IV cache outside component
+const ivCache = new Map();
+const readCache = new Set();
 
 export const ChatProvider = ({ children, currentUserEmail, currentUserId: initialUserId }) => {
   const [channels, setChannels] = useState([]);
   const [currentUserId, setCurrentUserId] = useState(initialUserId || null);
   const [socket, setSocket] = useState(null);
   const [onlineUsers, setOnlineUsers] = useState(new Set());
-  const readCache = new Set();
 
   /* Author: Lethabo Mazui
      LatestUpdate: Fetch stakeholderId
@@ -50,40 +150,7 @@ export const ChatProvider = ({ children, currentUserEmail, currentUserId: initia
     
     // TEMPORARILY DISABLE SOCKET.IO
     console.log('Socket.IO temporarily disabled - focus on WasteAnalytics');
-    /*
-    const newSocket = io(process.env.REACT_APP_BACKEND_URL, { query: { userId: currentUserId } });
-    setSocket(newSocket);
-
-    newSocket.emit('joinUser', { userId: currentUserId });
-
-    newSocket.on('newMessage', async (msg) => {
-      const decrypted = await decryptMessage(msg);
-      setChannels(prev => prev.some(m => m.chatid === msg.chatid) ? prev : [...prev, decrypted]);
-    });
-
-    newSocket.on('messageDelivered', ({ chatid }) => {
-      setChannels(prev => prev.map(msg => msg.chatid === chatid ? { ...msg, delivered: true } : msg));
-    });
-
-    newSocket.on('messageRead', ({ donationid, senderId }) => {
-      setChannels(prev => prev.map(msg => msg.donationid === donationid && msg.senderid !== senderId ? { ...msg, readreceipts: true } : msg));
-    });
-
-    newSocket.on('onlineUsers', (onlineIds) => setOnlineUsers(new Set(onlineIds)));
-    newSocket.on('userConnected', (userId) => setOnlineUsers(prev => new Set(prev).add(userId)));
-    newSocket.on('userDisconnected', (userId) => setOnlineUsers(prev => {
-      const updated = new Set(prev);
-      updated.delete(userId);
-      return updated;
-    }));
-
-    return () => {
-      newSocket.disconnect();
-      newSocket.off('onlineUsers');
-      newSocket.off('userConnected');
-      newSocket.off('userDisconnected');
-    };
-    */
+    // Socket.IO code commented out for now
   }, [currentUserId]);
 
   /* Author: Lethabo Mazui
