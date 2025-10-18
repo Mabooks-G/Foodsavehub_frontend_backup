@@ -42,6 +42,8 @@ class App extends Component {
       donationsNotifications: 0, 
       refreshFlag: false,
       pushEnabled: false, //  new state for push notifications
+      sidebarCollapsed: true, // Add mobile sidebar state
+      isMobile: false // Add mobile detection
     };
   }
 
@@ -61,6 +63,10 @@ class App extends Component {
   };
 
   componentDidMount() {
+    // Detect mobile on mount and add resize listener
+    this.checkMobile();
+    window.addEventListener('resize', this.checkMobile);
+    
     if (this.state.currentUser) {
       this.fetchUnreadCount();
       this.fetchPendingDonations();
@@ -73,7 +79,18 @@ class App extends Component {
   componentWillUnmount() {
     clearInterval(this.unreadInterval);
      clearInterval(this.pendingInterval);
+    window.removeEventListener('resize', this.checkMobile);
   }
+
+  /* Author: Mobile Detection
+     Event: Sprint 2 Fix
+     LatestUpdate: 2025/10/01
+     Description: Detect mobile screen size for sidebar handling
+  */
+  checkMobile = () => {
+    const isMobile = window.innerWidth <= 768;
+    this.setState({ isMobile });
+  };
 
   handleMarkNotificationRead = (id) => {
     this.setState(prev => ({
@@ -167,16 +184,23 @@ class App extends Component {
 
 
   /* ------------------------------
-     Sidebar Renderer
+     Sidebar Renderer - UPDATED FOR MOBILE
+     Author: Mobile Fix
+     Event: Sprint 2
+     LatestUpdate: 2025/10/01
+     Description: Fixed mobile hamburger and sidebar behavior
   ------------------------------ */
 toggleSidebar = () => {
   this.setState(prev => ({ sidebarCollapsed: !prev.sidebarCollapsed }));
 };
 
 renderSidebar() {
-  const { unreadCount, sidebarCollapsed } = this.state;
-  const { donationsNotifications } = this.state;
-  const { pushEnabled } = this.state;
+  const { unreadCount, sidebarCollapsed, isMobile, donationsNotifications, pushEnabled } = this.state;
+
+  // For mobile: always show expanded when not collapsed
+  const sidebarClass = isMobile 
+    ? sidebarCollapsed ? "collapsed" : "expanded"
+    : sidebarCollapsed ? "collapsed" : "expanded";
 
   return (
     <ChatContext>
@@ -189,48 +213,66 @@ renderSidebar() {
         if (!pushEnabled) unreadMessagesCount = 0;
 
         return (
-          <nav className={`navbar ${sidebarCollapsed ? "collapsed" : "expanded"}`}>
-            {/* Hamburger toggle */}
+          <nav className={`navbar ${sidebarClass}`}>
+            {/* Hamburger toggle - ALWAYS VISIBLE */}
             <div className="hamburger-btn" onClick={this.toggleSidebar}>
-              🍔
+              {sidebarCollapsed ? "≡" : "×"}
             </div>
 
-            {/* Navigation links */}
-            <div className="nav-links">
-              <Link to="/">🏡 <span className="label">Home</span></Link>
-              <Link to="/profile">🧑 <span className="label">Profile</span></Link>
-              <Link to="/bulkupload">🗂️ <span className="label">Bulk Upload</span></Link>
-              {/* Remove later ↓ */}
-              <Link to="/foodmanagement">🍎 <span className="label">Food Management</span></Link>
-              <Link to="/communication" className="notification-link">
-                🗨️ <span className="label">Communication</span>
-                {unreadMessagesCount > 0 && (
-                  <span className="notification-badge">{unreadMessagesCount}</span>
-                )}
-              </Link>
-              <Link to="/donations" className="notification-link">
-                🧺 <span className="label">Donations</span>
-                {donationsNotifications > 0 && (
-                  <span className="notification-badge">{donationsNotifications}</span>
-                )}
-              </Link>
-              <Link to="/recipes">🍲 <span className="label">Recipes</span></Link>
-              <Link to="/waste">♻️ <span className="label">Waste Analysis</span></Link>
-              <Link to="/notifications" className="notification-link">
-                🛎️ <span className="label">Notifications</span>
-                {unreadCount > 0 && (
-                  <span className="notification-badge">{unreadCount}</span>
-                )}
-              </Link>
-              <Link to="/expiry">⏱️ <span className="label">Expiry Manager</span></Link>
-            </div>
+            {/* Navigation links - conditionally show on mobile when expanded */}
+            {(isMobile && sidebarCollapsed) ? null : (
+              <>
+                <div className="nav-links">
+                  <Link to="/" onClick={() => isMobile && this.toggleSidebar()}>
+                    🏡 <span className="label">Home</span>
+                  </Link>
+                  <Link to="/profile" onClick={() => isMobile && this.toggleSidebar()}>
+                    🧑 <span className="label">Profile</span>
+                  </Link>
+                  <Link to="/bulkupload" onClick={() => isMobile && this.toggleSidebar()}>
+                    🗂️ <span className="label">Bulk Upload</span>
+                  </Link>
+                  {/* Remove later ↓ */}
+                  <Link to="/foodmanagement" onClick={() => isMobile && this.toggleSidebar()}>
+                    🍎 <span className="label">Food Management</span>
+                  </Link>
+                  <Link to="/communication" className="notification-link" onClick={() => isMobile && this.toggleSidebar()}>
+                    🗨️ <span className="label">Communication</span>
+                    {unreadMessagesCount > 0 && (
+                      <span className="notification-badge">{unreadMessagesCount}</span>
+                    )}
+                  </Link>
+                  <Link to="/donations" className="notification-link" onClick={() => isMobile && this.toggleSidebar()}>
+                    🧺 <span className="label">Donations</span>
+                    {donationsNotifications > 0 && (
+                      <span className="notification-badge">{donationsNotifications}</span>
+                    )}
+                  </Link>
+                  <Link to="/recipes" onClick={() => isMobile && this.toggleSidebar()}>
+                    🍲 <span className="label">Recipes</span>
+                  </Link>
+                  <Link to="/waste" onClick={() => isMobile && this.toggleSidebar()}>
+                    ♻️ <span className="label">Waste Analysis</span>
+                  </Link>
+                  <Link to="/notifications" className="notification-link" onClick={() => isMobile && this.toggleSidebar()}>
+                    🛎️ <span className="label">Notifications</span>
+                    {unreadCount > 0 && (
+                      <span className="notification-badge">{unreadCount}</span>
+                    )}
+                  </Link>
+                  <Link to="/expiry" onClick={() => isMobile && this.toggleSidebar()}>
+                    ⏱️ <span className="label">Expiry Manager</span>
+                  </Link>
+                </div>
 
-            {/* Logout */}
-            <div className="sidebar-footer">
-              <button className="logout-btn" onClick={this.handleLogout}>
-                🏁 <span className="label">Log out</span>
-              </button>
-            </div>
+                {/* Logout */}
+                <div className="sidebar-footer">
+                  <button className="logout-btn" onClick={this.handleLogout}>
+                    🏁 <span className="label">Log out</span>
+                  </button>
+                </div>
+              </>
+            )}
           </nav>
         );
       }}
