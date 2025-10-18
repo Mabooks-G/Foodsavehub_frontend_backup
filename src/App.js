@@ -17,6 +17,7 @@ import Donor from './donation_coordination/donor';
 import GroceryList from './donation_coordination/grocerylist';
 import Recipes from './recipe/Recipe';
 import Waste from './waste_analyses/WasteAnalyses';
+import FoodManagement from './waste_analyses/FoodManagement';
 import Notifications from './notifications/Notification';
 import ExpiryManager from './expiry_manager/ExpiryManager';
 import BulkUpload from './database/BulkUpload';
@@ -268,6 +269,7 @@ renderSidebar() {
                 <Route path="/waste" element={<Waste currentUser={currentUser} />} />
                 <Route path="/expiry" element={<ExpiryManager currentUser={currentUser} />} />
                 <Route path="/bulkupload" element={<BulkUpload currentUser={currentUser} />} />
+                <Route path="/foodmanagement" element={<FoodManagement currentUser={currentUser} />} /> {/* remove later */}
                 <Route path="/notifications" element={
                   <Notifications
                     currentUser={currentUser}
