@@ -1,3 +1,11 @@
+/* Author: Bethlehem Shimelis
+   Event: Sprint 1: Manually Input Food Items with Expiry dates
+   LatestUpdate: Established Navigation between view and edit of fooditems lists
+   parameters: user input
+   Description: Handles Navigation for Login and Registration
+   Returns: posts to the API backend*/
+
+
 import React, { useState } from "react";
 import HomeDash from "./HomeComponents/HomeDash";
 import HomeForm from "./HomeComponents/HomeForm";
@@ -6,7 +14,7 @@ import "./HomeUser.css";
 export default function HomeUser({ currentUser }) {
   const [showForm, setShowForm] = useState(false);
   const [refreshFlag, setRefreshFlag] = useState(false);
-
+  
   const handleAddNew = () => setShowForm(true);
   const handleCloseForm = () => {
     setShowForm(false);

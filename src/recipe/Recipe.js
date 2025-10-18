@@ -22,7 +22,9 @@ class Recipe extends Component {
       recipeToDelete: null,      // store which recipe is pending deletion
       aiMessage: "This is a temporary OpenAI message.",  // store AI response message
       selectedRecipe: null, // stores recipe to display in modal
-  showDetailModal: false // controls modal visibility
+  showDetailModal: false, // controls modal visibility
+  showSuccessModal: false, // show modal after successful delete
+  deleting: false  // show spinner while deleting
     };
   }
 
@@ -91,19 +93,8 @@ fetchInventory = async () => {
          }
       });
 
-      // ✅ API already filters items expiring in <= 2 days
+      // API already filters items expiring in <= 2 days
       const items = res.data.map((item) => item.name);
-
-      /*this.setState(
-      { items: items.length > 0 ? items : ["No items expiring soon"], loading: false },
-      () => {
-        this.fetchInventory(); // ✅ Call after items state is updated
-      }
-    );*/
-
-    /*this.setState(
-      { items: items.length > 0 ? items : ["No items expiring soon"], loading: false },
-    );*/
 
      this.setState(
       { items: items.length > 0 ? items : ["No items expiring soon"], loading: false },
@@ -119,6 +110,9 @@ fetchInventory = async () => {
   }
 };
 
+ // Toggle selection state of an ingredient/item
+  // - If the item is already in selectedItems, remove it
+  // - Otherwise, add it to the list of selectedItems
   toggleItem = (item) => {
     this.setState((prevState) => {
       const alreadySelected = prevState.selectedItems.includes(item);
@@ -130,6 +124,9 @@ fetchInventory = async () => {
     });
   };
 
+  // Toggle filter options for recipe generation
+  // - If the filter option is already applied, remove it
+  // - Otherwise, add it to the filters list
   handleFilterChange = (filterOption) => {
   this.setState((prevState) => {
     const alreadySelected = prevState.filters.includes(filterOption);
@@ -141,8 +138,10 @@ fetchInventory = async () => {
   });
 };
 
-
- 
+  // Handle recipe generation
+  // - Validates that at least one item is selected
+  // - If no items are selected, alerts the user and exits early
+  // - Otherwise, continues with recipe generation logic (API call, etc.)
   handleGenerate = async () => {
   const { selectedItems, filters } = this.state;
 
@@ -151,7 +150,7 @@ fetchInventory = async () => {
     return;
   }
 
-  // 🔹 Set generating to true BEFORE starting API call
+  // Set generating to true BEFORE starting API call
   this.setState({ generating: true });
 
   try {
@@ -186,8 +185,7 @@ fetchInventory = async () => {
   }
 };
 
-
-  // Toggle function - FIXED
+  // Toggle function
   toggleExpand = (index) => {
     console.log('Toggle clicked for index:', index); // Debug log
     this.setState(prevState => {
@@ -257,7 +255,7 @@ fetchInventory = async () => {
       preferences: this.state.filters.length > 0 ? this.state.filters : ["None"] // <-- default
     });
 
-     // ✅ Update the saved flag
+ // Update the saved flag
     this.setState((prevState) => {
       const updatedRecipes = [...prevState.recipes];
       updatedRecipes[index] = { ...updatedRecipes[index], saved: true };
@@ -270,9 +268,13 @@ fetchInventory = async () => {
   }
 };
 
+//handles the delete functionality of a recipe
 handleDelete = async (recipeId, index) => {
   const { recipeToDelete } = this.state;
   if (!recipeToDelete) return;
+
+  this.setState({ deleting: true }); // show spinner
+
 
   try {
     const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
@@ -283,14 +285,20 @@ handleDelete = async (recipeId, index) => {
     await axios.delete(`${API_BACKEND}/api/recipe/delete`, {
       data: { email: loggedInUser.email, recipeId } // pass recipeId + email
     });
- // ✅ Close the detail modal as well
+
+ // Close the detail modal as well
     this.closeDetailModal();
 
-    // ✅ Remove recipe from state
+    // Remove recipe from state
     this.setState((prevState) => {
       const updatedRecipes = [...prevState.recipes];
       updatedRecipes.splice(recipeToDelete.index, 1); // remove the deleted recipe
-      return { recipes: updatedRecipes, showConfirmModal: false, recipeToDelete: null };
+      return { recipes: updatedRecipes, 
+        showConfirmModal: false, 
+        recipeToDelete: null, 
+        showSuccessModal: true,
+        deleting: false // stop spinner
+      };
     });
 
   } catch (err) {
@@ -300,9 +308,8 @@ handleDelete = async (recipeId, index) => {
   }
 };
 
-
-  // Inside your Recipe component
-// Inside your Recipe component
+  // Inside my Recipe component (show saved recipes and display 'no saved recipes')
+  // if there are no saved recipes
 ifShowSavedPanel = () => {
   const { recipes, showConfirmModal, recipeToDelete, selectedRecipe, showDetailModal } = this.state;
 
@@ -312,8 +319,11 @@ ifShowSavedPanel = () => {
         <div className="recipe-card">
           <h2 className="recipe-title">Saved Recipes</h2>
           <p style={{ fontStyle: "italic", color: "#555", marginBottom: "10px" }}>
-            Click anywhere on a recipe card to view the details
-          </p>
+  {recipes.length === 0
+    ? "You have no saved recipes."
+    : "Click anywhere on a recipe card to view the details."}
+</p>
+
 
           <div className="recipe-results">
             {recipes.map((recipe, index) => (
@@ -334,14 +344,12 @@ ifShowSavedPanel = () => {
                     {recipe?.preferences && (
                      <p>
   Preferences:{" "}
-  {selectedRecipe?.preferences && selectedRecipe.preferences.length > 0
-    ? Array.isArray(selectedRecipe.preferences)
-      ? selectedRecipe.preferences.join(", ")
-      : selectedRecipe.preferences
+  {recipe?.preferences && recipe.preferences.length > 0
+    ? Array.isArray(recipe.preferences)
+      ? recipe.preferences.join(", ")
+      : recipe.preferences
     : "None"}
 </p>
-
-
                     )}
 
                     <button
@@ -382,14 +390,12 @@ ifShowSavedPanel = () => {
                       {recipe?.preferences && (
                         <p>
   Preferences:{" "}
-  {selectedRecipe?.preferences && selectedRecipe.preferences.length > 0
-    ? Array.isArray(selectedRecipe.preferences)
-      ? selectedRecipe.preferences.join(", ")
-      : selectedRecipe.preferences
+  {recipe?.preferences && recipe.preferences.length > 0
+    ? Array.isArray(recipe.preferences)
+      ? recipe.preferences.join(", ")
+      : recipe.preferences
     : "None"}
 </p>
-
-
 
                       )}
                     </div>
@@ -448,9 +454,6 @@ ifShowSavedPanel = () => {
       : selectedRecipe.preferences
     : "None"}
 </p>
-
-
-
             )}
 
             <div className="recipe-details">
@@ -483,8 +486,6 @@ ifShowSavedPanel = () => {
   );
 };
 
-
-
 render() {
   const {
     selectedItems,
@@ -503,7 +504,17 @@ render() {
     selectedRecipe
   } = this.state;
 
-  // Loading states
+ //shows the thingy when deleting
+if (this.state.deleting) {
+  return (
+    <div className="loading-container">
+      <div className="spinner"></div>
+      <p>Deleting your recipe...</p>
+    </div>
+  );
+}
+
+ //shows the thingy when loading
   if (loading) {
     return (
       <div className="loading-container">
@@ -552,6 +563,35 @@ render() {
         </div>
       )}
 
+    {/* Success Modal */}
+{this.state.showSuccessModal && (
+  <div 
+    className="modal-overlay" 
+    onClick={() => this.setState({ showSuccessModal: false })}
+  >
+    <div className="modal" onClick={(e) => e.stopPropagation()}>
+      <h3>Recipe successfully deleted</h3>
+      <div style={{ textAlign: "center", marginTop: "20px" }}>
+        <button 
+          className="modal-btn" 
+          style={{
+            backgroundColor: "green",
+            color: "white",
+            padding: "10px 20px",
+            border: "none",
+            borderRadius: "5px",
+            cursor: "pointer",
+            fontWeight: "bold"
+          }}
+          onClick={() => this.setState({ showSuccessModal: false })}
+        >
+          OK
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
       {/* Recipe Detail Modal */}
 {showDetailModal && selectedRecipe && (
   <div className="modal-overlay" onClick={this.closeDetailModal}>
@@ -569,11 +609,7 @@ render() {
       : selectedRecipe.preferences
     : "None"}
 </p>
-
-
 )}
-
-
       <div className="recipe-details">
         <h4>Ingredients:</h4>
         <ul>
@@ -588,11 +624,7 @@ render() {
             <li key={idx}>{s}</li>
           ))}
         </ol>
-
-
-        
       </div>
-
       <button
         className="generate-btn"
         onClick={this.closeDetailModal}
@@ -689,7 +721,9 @@ render() {
     <div className="notification-wrapper" style={{ display: "flex", gap: "20px" }}>
       <div className="recipe-container">
         <div className="recipe-card">
-          <h2 className="recipe-title">AI Recipe Generator</h2>
+          <h1 >AI Recipe Generator</h1>
+          <h2 className="recipe-title">Expiring Inventory Items</h2>
+          <p> Your food items that are going to expire in 7 days or less are listed below.</p>
 
           <div className="recipe-list">
             {items.map((item, index) => (
@@ -705,21 +739,28 @@ render() {
           </div>
 
           <h2 className="recipe-title">Other Inventory Items</h2>
-          <div className="recipe-list">
-            {inventory.map((item, index) => (
-              <label key={index}>
-                <input
-                  type="checkbox"
-                  checked={selectedItems.includes(item)}
-                  onChange={() => this.toggleItem(item)}
-                />
-                {item}
-              </label>
-            ))}
-          </div>
+{inventory.length === 0 ? (
+  <p className="empty-message">There are no other food items in your inventory.</p>
+) : (
+  <>
+    <p>The rest of the food items in your inventory are listed below.</p>
+    <div className="recipe-list">
+      {inventory.map((item, index) => (
+        <label key={index}>
+          <input
+            type="checkbox"
+            checked={selectedItems.includes(item)}
+            onChange={() => this.toggleItem(item)}
+          />
+          {item}
+        </label>
+      ))}
+    </div>
+  </>
+)}
 
   <div className="filter-options">
-  <h4 className="filter-title">Filter by:</h4>
+  <h2 className="filter-title">Please select your dietary preferences:</h2>
 
   <ul>
     {["Vegan", "Vegetarian", "Gluten-Free"].map(option => (
@@ -737,15 +778,12 @@ render() {
   </ul>
 </div>
 
-
-
           <button className="generate-btn" onClick={this.handleGenerate}>
             Generate New Recipe
           </button>
 
-          <p className="recipe-subtitle">
-            View your saved recipes below.
-          </p>
+          <h2 className="recipe-subtitle">View your saved recipes below.</h2>
+
           <button className="generate-btn" onClick={this.fetchSavedRecipes}>
             View Saved Recipes
           </button>

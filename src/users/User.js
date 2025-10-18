@@ -1,9 +1,19 @@
+/* Author: Bethlehem Shimelis
+   Event: Sprint 2: User Profile Access and Editing
+   LatestUpdate: Implemented password change with OTP verification
+   Purpose: Handles viewing and editing of the user's profile, including
+            region selection, push notifications, and password changes
+            with OTP verification.
+*/
+
 import React, { useState, useEffect, useMemo } from "react";
 import axios from "axios";
 import "./Profile.css";
 
+// Backend API URL from environment variables
 const API_BACKEND = process.env.REACT_APP_API_BACKEND;
 
+// List of regions for the region selector
 const regions = [ 
   "Durban, KwaZulu-Natal",
   "Cape Town, Western Cape",
@@ -23,22 +33,47 @@ const regions = [
   "Pietermaritzburg, KwaZulu-Natal"
 ];
 
-
 export default function User({ currentUser }) {
+  // Full user data fetched from backend or passed via props
   const [userData, setUserData] = useState(null);
+
+  // Boolean to track if user is in editing mode
   const [editing, setEditing] = useState(false);
+
+  // Form state for inputs (name, region, capacity, password fields)
   const [formData, setFormData] = useState({});
+
+  // Boolean to track whether the user wants to change password
   const [changePassword, setChangePassword] = useState(false);
+
+  // Boolean to track whether OTP step is active
   const [otpStep, setOtpStep] = useState(false);
+
+  // OTP input value
   const [otp, setOtp] = useState("");
+
+  // Push notification preference
   const [pushNotifications, setPushNotifications] = useState(true);
+
+  // General success/error messages
   const [message, setMessage] = useState("");
+
+  // OTP-specific messages (sent, verified, failed)
   const [otpMessage, setOtpMessage] = useState("");
+
+  // Region search input for dropdown
   const [regionSearch, setRegionSearch] = useState("");
+
+  // Dropdown visibility for region search
   const [showDropdown, setShowDropdown] = useState(false);
+
+  // Cooldown timer for resending OTP
   const [resendCooldown, setResendCooldown] = useState(0);
+
+  // Password strength indicator (0–100)
   const [passwordStrength, setPasswordStrength] = useState(0);
 
+  // Initialize user data and form state when component mounts or currentUser changes
   useEffect(() => {
     if (currentUser) {
       setUserData(currentUser);
@@ -54,15 +89,18 @@ export default function User({ currentUser }) {
     }
   }, [currentUser]);
 
+  // Filter regions based on search input
   const filteredRegions = useMemo(() => {
     return regions.filter(r =>
       r.toLowerCase().includes(regionSearch.toLowerCase())
     );
   }, [regionSearch]);
 
+  // Handle input changes for text fields
   const handleChange = (e) => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
 
+    // Update password strength dynamically
     if (e.target.name === "password") {
       const pwd = e.target.value;
       let strength = 0;
@@ -75,12 +113,14 @@ export default function User({ currentUser }) {
     }
   };
 
+  // Set region when user selects from dropdown
   const handleRegionSelect = (region) => {
     setFormData(prev => ({ ...prev, region }));
     setRegionSearch(region);
     setShowDropdown(false);
   };
 
+  // Toggle editing mode on/off
   const handleEditToggle = () => {
     setEditing(!editing);
     setMessage("");
@@ -91,24 +131,27 @@ export default function User({ currentUser }) {
     setPasswordStrength(0);
   };
 
+  // Send OTP for password change
   const handleSendOtp = async () => {
     try {
       await axios.post(`${API_BACKEND}/api/auth/request-otp`, { email: userData.email });
       setOtpStep(true);
       setOtpMessage("OTP sent!");
-      setResendCooldown(30);
+      setResendCooldown(30); // 30-second cooldown before resending
     } catch (err) {
       console.error(err);
       setOtpMessage(err.response?.data?.error || "Failed to send OTP");
     }
   };
 
+  // Countdown timer for resend OTP button
   useEffect(() => {
     if (resendCooldown <= 0) return;
     const timer = setInterval(() => setResendCooldown(prev => prev - 1), 1000);
     return () => clearInterval(timer);
   }, [resendCooldown]);
 
+  // Verify OTP entered by user
   const verifyOtp = async () => {
     try {
       await axios.post(`${API_BACKEND}/api/auth/verify-otp`, { email: userData.email, otp });
@@ -120,9 +163,11 @@ export default function User({ currentUser }) {
     }
   };
 
+  // Save profile changes (including optional password change)
   const handleSave = async () => {
     setMessage("");
 
+    // Validate passwords if changing
     if (changePassword) {
       if (!formData.password || formData.password !== formData.confirmPassword) {
         setMessage("Passwords do not match or are empty!");
@@ -136,12 +181,14 @@ export default function User({ currentUser }) {
     }
 
     try {
+      // Build payload for API
       const payload = {
         email: userData.email,
         name: formData.name,
         region: formData.region,
         push_notifications: pushNotifications ? 1 : 0
       };
+      // Include capacity only for charity stakeholders
       if (userData.stakeholderID?.startsWith("c")) payload.capacity = Number(formData.capacity);
       if (changePassword && formData.password) payload.newPassword = formData.password;
 
@@ -159,6 +206,7 @@ export default function User({ currentUser }) {
     }
   };
 
+  // Render loading if user data is not yet available
   if (!userData) return <p>Loading...</p>;
 
   return (
@@ -166,11 +214,13 @@ export default function User({ currentUser }) {
       <div className="profile-card">
         <h2>User Profile</h2>
 
+        {/* Display Email (non-editable) */}
         <div className="profile-row">
           <label>Email:</label>
           <span>{userData.email}</span>
         </div>
 
+        {/* Name field */}
         <div className="profile-row">
           <label>Name:</label>
           {editing ? (
@@ -178,6 +228,7 @@ export default function User({ currentUser }) {
           ) : <span>{userData.name}</span>}
         </div>
 
+        {/* Region field with search dropdown */}
         <div className="profile-row">
           <label>Region:</label>
           {editing ? (
@@ -203,6 +254,7 @@ export default function User({ currentUser }) {
           ) : <span>{userData.region}</span>}
         </div>
 
+        {/* Capacity field for charity stakeholders */}
         {userData.stakeholderID?.startsWith("c") && (
           <div className="profile-row">
             <label>Capacity:</label>
@@ -212,6 +264,7 @@ export default function User({ currentUser }) {
           </div>
         )}
 
+        {/* Push notifications toggle and password change toggle */}
         {editing && (
           <>
             <div className="profile-row slider-row">
@@ -230,12 +283,14 @@ export default function User({ currentUser }) {
               </label>
             </div>
 
+            {/* Send OTP button if password change initiated */}
             {changePassword && !otpStep && (
               <button className="btn otp-btn" type="button" onClick={handleSendOtp}>
                 {otpMessage ? <span className="otp-success">{otpMessage}</span> : "Send OTP"}
               </button>
             )}
 
+            {/* OTP verification input */}
             {otpStep && (
               <div className="profile-row">
                 <label>Enter OTP:</label>
@@ -244,6 +299,7 @@ export default function User({ currentUser }) {
               </div>
             )}
 
+            {/* New password inputs */}
             {changePassword && !otpStep && (
               <>
                 <div className="profile-row">
@@ -262,6 +318,7 @@ export default function User({ currentUser }) {
           </>
         )}
 
+        {/* Save / Cancel / Edit buttons */}
         <div className="profile-actions">
           {editing ? (
             <>
@@ -273,6 +330,7 @@ export default function User({ currentUser }) {
           )}
         </div>
 
+        {/* Feedback message */}
         {message && <p className="profile-message">{message}</p>}
       </div>
     </div>

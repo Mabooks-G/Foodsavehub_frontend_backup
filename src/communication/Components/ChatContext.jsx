@@ -92,7 +92,7 @@ const ivCache = new Map();
    Description: Safely decrypts message using cached key + IV
 */
 async function decryptMessage(msg) {
-  console.log('Attempting to decrypt message:', msg.chatid);
+ 
 
   if (!msg.chathistory || !msg.donationid) {
     console.log('Missing required fields for decryption');
@@ -125,7 +125,7 @@ async function decryptMessage(msg) {
     );
 
     const decryptedText = new TextDecoder().decode(decrypted);
-    console.log('Successfully decrypted:', decryptedText);
+   
 
     return { ...msg, chathistory: decryptedText };
 
