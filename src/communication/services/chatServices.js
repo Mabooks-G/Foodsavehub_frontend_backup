@@ -52,7 +52,7 @@ export async function updateChatHistory(donationid, senderid, chathistory, iv = 
     message_timestamp: message_timestamp || new Date().toISOString() // fallback
   };
   
-  console.log('Sending to backend:', requestBody);
+  //console.log('Sending to backend:', requestBody);
   
   const res = await fetch(`${API_BACKEND}/supabase/updateChatHistory`, {
     method: "POST",

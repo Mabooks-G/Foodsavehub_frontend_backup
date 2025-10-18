@@ -82,7 +82,7 @@ async function decryptMessage(msg) {
   try {
     // Derive AES-GCM key
     const key = await deriveKey(msg.donationid);
-    console.log('Key derived for donation:', msg.donationid);
+    //console.log('Key derived for donation:', msg.donationid);
 
     // Use cached IV if available, otherwise fallback (cannot reconstruct!)
     let ivB64;
@@ -105,7 +105,7 @@ async function decryptMessage(msg) {
     );
 
     const decryptedText = new TextDecoder().decode(decrypted);
-    console.log('Successfully decrypted:', decryptedText);
+    //console.log('Successfully decrypted:', decryptedText);
 
     return { ...msg, chathistory: decryptedText };
 
@@ -153,7 +153,7 @@ export const ChatProvider = ({ children, currentUserEmail, currentUserId: initia
     // Use the same backend URL as your API calls
     const backendUrl = process.env.REACT_APP_API_BACKEND || 'https://foodsave-backend-tdwp.onrender.com';
     
-    console.log('Connecting to WebSocket:', backendUrl);
+    //console.log('Connecting to WebSocket:', backendUrl);
     
     const newSocket = io(backendUrl, { 
       query: { userId: currentUserId },
@@ -185,7 +185,7 @@ export const ChatProvider = ({ children, currentUserEmail, currentUserId: initia
 
     // Handle new messages from other users
     newSocket.on('newMessage', async (msg) => {
-      console.log('WebSocket: New message received', msg);
+     // console.log('WebSocket: New message received', msg);
       
       // Only process if this message is not from ourselves
       if (msg.senderid !== currentUserId) {
@@ -198,7 +198,7 @@ export const ChatProvider = ({ children, currentUserEmail, currentUserId: initia
               console.log('Adding new message to channels:', decrypted);
               return [...prev, decrypted];
             }
-            console.log('Message already exists, skipping:', msg.chatid);
+            //console.log('Message already exists, skipping:', msg.chatid);
             return prev;
           });
         } catch (error) {
@@ -209,7 +209,7 @@ export const ChatProvider = ({ children, currentUserEmail, currentUserId: initia
 
     // Handle message delivered receipts
     newSocket.on('messageDelivered', ({ donationid, userId }) => {
-      console.log('WebSocket: Message delivered for donation', donationid);
+      //console.log('WebSocket: Message delivered for donation', donationid);
       setChannels(prev => prev.map(msg => 
         msg.donationid === donationid && msg.senderid !== userId 
           ? { ...msg, delivered: true } 
@@ -219,7 +219,7 @@ export const ChatProvider = ({ children, currentUserEmail, currentUserId: initia
 
     // Handle message read receipts
     newSocket.on('messageRead', ({ donationid, senderId }) => {
-      console.log('WebSocket: Message read for donation', donationid);
+      //console.log('WebSocket: Message read for donation', donationid);
       setChannels(prev => prev.map(msg => 
         msg.donationid === donationid && msg.senderid !== senderId 
           ? { ...msg, readreceipts: true } 
@@ -229,7 +229,7 @@ export const ChatProvider = ({ children, currentUserEmail, currentUserId: initia
 
     // Handle online users updates
     newSocket.on('onlineUsers', (onlineIds) => {
-      console.log('WebSocket: Online users updated', onlineIds);
+      //console.log('WebSocket: Online users updated', onlineIds);
       setOnlineUsers(new Set(onlineIds));
     });
 
@@ -289,7 +289,7 @@ export const ChatProvider = ({ children, currentUserEmail, currentUserId: initia
           const existingIds = prev.map(m => m.chatid);
           const newMessages = decryptedData.filter(m => !existingIds.includes(m.chatid));
           if (newMessages.length > 0) {
-            console.log('Polling: Adding new messages:', newMessages.length);
+            //console.log('Polling: Adding new messages:', newMessages.length);
             return [...prev, ...newMessages];
           }
           return prev;
@@ -312,7 +312,7 @@ export const ChatProvider = ({ children, currentUserEmail, currentUserId: initia
     if (!donationId || !senderId || !text.trim()) return;
 
     try {
-      console.log('Sending message:', { senderId, text, donationId });
+      //console.log('Sending message:', { senderId, text, donationId });
 
       // 1. Derive key first
       const key = await deriveKey(donationId);
@@ -361,7 +361,7 @@ export const ChatProvider = ({ children, currentUserEmail, currentUserId: initia
 
       // 9. Emit to socket for real-time delivery to other users
       if (socket && isSocketConnected) {
-        console.log('Emitting newMessage via WebSocket:', savedWithIv);
+        //console.log('Emitting newMessage via WebSocket:', savedWithIv);
         socket.emit('newMessage', savedWithIv);
       } else {
         console.warn('WebSocket not connected, message will not be delivered in real-time');
@@ -388,7 +388,7 @@ export const ChatProvider = ({ children, currentUserEmail, currentUserId: initia
     try {
       await markChatReadService(donationId, currentUserId);
       if (socket && isSocketConnected) {
-        console.log('Emitting messageRead via WebSocket:', { donationId, senderId: currentUserId });
+        //console.log('Emitting messageRead via WebSocket:', { donationId, senderId: currentUserId });
         socket.emit('messageRead', { donationId, senderId: currentUserId });
       }
     } catch (err) {
