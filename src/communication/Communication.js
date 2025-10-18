@@ -20,39 +20,46 @@ function CommunicationContent() {
   */
   const API_BACKEND = process.env.REACT_APP_API_BACKEND;
   useEffect(() => {
-    if (!currentUserEmail) {
-      console.warn('No currentUserEmail yet in ChatContext');
-      return;
-    }
+  if (!currentUserEmail) {
+    console.warn('No currentUserEmail yet in ChatContext');
+    return;
+  }
 
-    async function initUserChats() {
-      try {
-        console.log('Fetching user chats for', currentUserEmail);
+  async function initUserChats() {
+    try {
+      console.log('Fetching user chats for', currentUserEmail);
 
-        const res = await fetch(`${API_BACKEND}/supabase/getUserChats`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: currentUserEmail, since: '1970-01-01T00:00:00Z' }),
-        });
+      const res = await fetch(`${API_BACKEND}/supabase/getUserChats`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: currentUserEmail, since: '1970-01-01T00:00:00Z' }),
+      });
 
-        if (!res.ok) {
-          const text = await res.text();
-          console.error('Fetch failed with status', res.status, text);
-          return;
-        }
-
-        const chats = await res.json();
-        console.log('User chats fetched:', chats);
-
-        const hasApprovedDonation = Array.isArray(chats) && chats.length > 0;
-        setCanAccessChats(hasApprovedDonation);
-      } catch (err) {
-        console.error('Error initializing user chats:', err);
+      if (!res.ok) {
+        const text = await res.text();
+        console.error('Fetch failed with status', res.status, text);
+        setCanAccessChats(false);
+        return;
       }
-    }
 
-    initUserChats();
-  }, [currentUserEmail]);
+      const chats = await res.json();
+      console.log('User chats fetched:', chats);
+
+      // Check if user has any approved donations with chats
+      const hasApprovedDonation = Array.isArray(chats) && chats.length > 0;
+      setCanAccessChats(hasApprovedDonation);
+      
+      if (!hasApprovedDonation) {
+        console.log('No approved donations with chats found for user');
+      }
+    } catch (err) {
+      console.error('Error initializing user chats:', err);
+      setCanAccessChats(false);
+    }
+  }
+
+  initUserChats();
+}, [currentUserEmail]);
 
   /* Author: Lethabo Mazui
      Event: Sprint 1
