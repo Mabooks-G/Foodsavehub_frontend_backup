@@ -31,10 +31,52 @@ class Recipe extends Component {
   componentDidMount() {
     this.fetchExpiringItems();
   }
-
-  openDetailModal = (recipe) => {
-  this.setState({ selectedRecipe: recipe, showDetailModal: true });
-};
+/*
+componentDidMount() {
+  this.setState({
+    recipes: [
+      {
+        title: "Mock Margherita Pizza",
+        prepTime: "30 mins",
+        ingredients: ["Flour", "Tomato sauce", "Mozzarella", "Basil"],
+        steps: [
+          "Prepare the pizza dough and let it rise for 1 hour.",
+          "Spread tomato sauce evenly on the dough.",
+          "Add mozzarella and basil leaves.",
+          "Bake at 220°C for 12–15 minutes until golden and bubbly."
+        ],
+        image: "https://images.unsplash.com/photo-1601924582971-6eec5daed8b2?q=80&w=735&auto=format&fit=crop",
+      },
+      {
+        title: "Mock Creamy Mushroom Pasta",
+        prepTime: "25 mins",
+        ingredients: ["Pasta", "Mushrooms", "Garlic", "Cream", "Parmesan"],
+        steps: [
+          "Boil pasta in salted water until al dente.",
+          "Sauté mushrooms and garlic in butter.",
+          "Add cream and simmer for 5 minutes.",
+          "Toss in pasta and sprinkle Parmesan before serving."
+        ],
+        image: "https://images.unsplash.com/photo-1605478371310-1d9f65e98207?q=80&w=735&auto=format&fit=crop",
+      },
+      {
+        title: "Mock Veggie Stir-Fry",
+        prepTime: "20 mins",
+        ingredients: ["Broccoli", "Bell peppers", "Carrots", "Soy sauce", "Tofu"],
+        steps: [
+          "Cut all vegetables and tofu into bite-sized pieces.",
+          "Heat oil in a wok and sauté tofu until golden.",
+          "Add vegetables and stir-fry for 5 minutes.",
+          "Pour in soy sauce and cook for 2 more minutes before serving."
+        ],
+        image: "https://images.unsplash.com/photo-1598024804490-85f9f4bfb8ab?q=80&w=735&auto=format&fit=crop",
+      }
+    ],
+    showGeneratedPanel: true,
+    loading: false
+  });
+}
+*/
 
 closeDetailModal = () => {
   this.setState({ selectedRecipe: null, showDetailModal: false });
@@ -161,16 +203,16 @@ fetchInventory = async () => {
 });
 
     const hardcodedImages = [
-  "https://images.unsplash.com/photo-1466637574441-749b8f19452f?q=80&w=880&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-  "https://images.unsplash.com/photo-1506368249639-73a05d6f6488?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-  "https://images.unsplash.com/photo-1679556217543-c0cc895892f5?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+  "https://images.unsplash.com/photo-1708658223534-f4a3db0ec7ce?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=735",
+  "https://images.unsplash.com/photo-1708658223534-f4a3db0ec7ce?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=735",
+  "https://images.unsplash.com/photo-1708658223534-f4a3db0ec7ce?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=735"
 ];
 
     const recipes = res.data.suggestions.map((recipe, index) => ({
       ...recipe,
       expanded: false, // ensure expanded property exists for each recipe
       saved: false,
-      image: hardcodedImages[index] || "https://images.unsplash.com/photo-1692288843207-786c8cb62e7a?q=80&w=1370&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+      image: hardcodedImages[index] || "https://images.unsplash.com/photo-1708658223534-f4a3db0ec7ce?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=735"
     }));
 
     this.setState({
@@ -335,11 +377,11 @@ ifShowSavedPanel = () => {
                 {!recipe?.expanded ? (
                   <>
                     <img
-                      src="https://pbs.twimg.com/media/D-ZJuhVU8AA_2jS.jpg:large"
+                      src="https://images.unsplash.com/photo-1571805268214-e9d753350217?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=687"
                       alt={recipe?.title || "Recipe Image"}
                     />
                     <h3>{recipe?.title || "Untitled"}</h3>
-                    <p>Prep: {recipe?.prepTime || "N/A"}</p>
+                    <p>Prep Time: {recipe?.prepTime || "N/A"}</p>
 
                     {recipe?.preferences && (
                      <p>
@@ -365,7 +407,7 @@ ifShowSavedPanel = () => {
                 ) : (
                   <>
                     <img
-                      src="https://images.unsplash.com/photo-1640517853869-6c7ae166884f?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0"
+                      src="https://images.unsplash.com/photo-1571805268214-e9d753350217?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=687"
                       alt={recipe?.title || "Recipe Image"}
                       className="recipe-detail-image"
                     />
@@ -406,7 +448,7 @@ ifShowSavedPanel = () => {
           </div>
 
           <button
-            className="generate-btn"
+            className="back-btn"
             style={{ marginTop: "20px" }}
             onClick={this.handleBack}
           >
@@ -660,9 +702,9 @@ if (this.state.deleting) {
             >
               {!recipe.expanded ? (
                 <>
-                  <img src={"https://media.istockphoto.com/id/1365005008/vector/bread-and-bakery-product-emoji-vector-illustration-set.jpg?s=612x612&w=0&k=20&c=8eGCvGb5H1pE2vHleMbRnddX2QlJUsXPBMoENvfImQ8="} alt={recipe.title} />
+                  <img src={"https://images.unsplash.com/photo-1708658223534-f4a3db0ec7ce?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=735"} alt={recipe.title} />
                   <h3>{recipe.title}</h3>
-                  <p>Prep: {recipe.prepTime}</p>
+                  <p>Prep Time: {recipe.prepTime}</p>
                   <button
                     className="save-btn"
                     disabled={recipe.saved}
@@ -706,7 +748,7 @@ if (this.state.deleting) {
         </div>
 
         <button
-          className="generate-btn"
+          className="back-btn"
           style={{ marginTop: "20px" }}
           onClick={this.handleBack}
         >
