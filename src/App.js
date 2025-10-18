@@ -185,7 +185,6 @@ renderSidebar() {
           m => !m.readreceipts && m.senderid !== currentUserId
         ).length;
 
-        
         // If pushEnabled is false, force unreadMessagesCount to 0
         if (!pushEnabled) unreadMessagesCount = 0;
 
@@ -201,6 +200,8 @@ renderSidebar() {
               <Link to="/">🏡 <span className="label">Home</span></Link>
               <Link to="/profile">🧑 <span className="label">Profile</span></Link>
               <Link to="/bulkupload">🗂️ <span className="label">Bulk Upload</span></Link>
+              {/* Remove later ↓ */}
+              <Link to="/foodmanagement">🍎 <span className="label">Food Management</span></Link>
               <Link to="/communication" className="notification-link">
                 🗨️ <span className="label">Communication</span>
                 {unreadMessagesCount > 0 && (
