@@ -41,14 +41,58 @@
   gap: 4px;
 }
 
-/* Responsive adjustments for buttons */
+/* Additional Button Styles */
+.scope-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #6c757d;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex: 1;
+  min-width: 80px;
+}
+
+.scope-btn:hover {
+  background: #e9ecef;
+  color: #495057;
+}
+
+.scope-btn.active {
+  background: #FF9800;
+  color: white;
+  box-shadow: 0 2px 4px rgba(255, 152, 0, 0.3);
+}
+
+.region-select {
+  padding: 8px 12px;
+  border: 1px solid #ced4da;
+  border-radius: 5px;
+  background: white;
+  font-size: 14px;
+  min-width: 200px;
+}
+
+/* Responsive adjustments */
 @media (max-width: 768px) {
-  .button-group {
+  .chart-controls {
     flex-direction: column;
-    gap: 4px;
+    align-items: stretch;
   }
   
-  .chart-btn, .period-btn {
+  .control-group {
+    width: 100%;
+  }
+  
+  .region-select {
     min-width: auto;
+    width: 100%;
+  }
+  
+  .button-group {
+    flex-direction: row;
   }
 }
