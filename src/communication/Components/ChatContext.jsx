@@ -18,10 +18,6 @@ const ChatContext = createContext();
 // ----------------------------
 // Base64 helpers
 // ----------------------------
-/* Author: Lethabo Mazui
-   LatestUpdate: Added buf/base64 conversion
-   Description: Converts ArrayBuffer to base64 string
-*/
 function bufToBase64(buf) {
   const bytes = new Uint8Array(buf);
   let binary = '';
@@ -29,10 +25,6 @@ function bufToBase64(buf) {
   return btoa(binary);
 }
 
-/* Author: Lethabo Mazui
-   LatestUpdate: Added base64 to ArrayBuffer conversion
-   Description: Converts base64 string to ArrayBuffer
-*/
 function base64ToBuf(b64) {
   const binary = atob(b64);
   const bytes = new Uint8Array(binary.length);
@@ -43,10 +35,6 @@ function base64ToBuf(b64) {
 // ----------------------------
 // AES-GCM encryption helpers
 // ----------------------------
-/* Author: Lethabo Mazui
-   LatestUpdate: Added encryptWithKey function
-   Description: Encrypts plaintext with AES-GCM using a derived key
-*/
 async function encryptWithKey(key, plaintext) {
   const iv = crypto.getRandomValues(new Uint8Array(12));
   const encoded = new TextEncoder().encode(plaintext);
@@ -58,10 +46,6 @@ async function encryptWithKey(key, plaintext) {
 // Key derivation
 // ----------------------------
 const keyCache = new Map();
-/* Author: Lethabo Mazui
-   LatestUpdate: Added deriveKey
-   Description: Deterministically derives AES-GCM key per donationId
-*/
 async function deriveKey(donationId) {
   if (keyCache.has(donationId)) return keyCache.get(donationId);
   const enc = new TextEncoder();
@@ -87,10 +71,6 @@ async function deriveKey(donationId) {
 // Decryption helper
 // ----------------------------
 const ivCache = new Map();
-/* Author: Lethabo Mazui
-   LatestUpdate: Added decryptMessage
-   Description: Safely decrypts message using cached key + IV
-*/
 async function decryptMessage(msg) {
   console.log('Attempting to decrypt message:', msg.chatid);
 
@@ -143,6 +123,7 @@ export const ChatProvider = ({ children, currentUserEmail, currentUserId: initia
   const [currentUserId, setCurrentUserId] = useState(initialUserId || null);
   const [socket, setSocket] = useState(null);
   const [onlineUsers, setOnlineUsers] = useState(new Set());
+  const [isSocketConnected, setIsSocketConnected] = useState(false);
   const readCache = new Set();
 
   /* Author: Lethabo Mazui
@@ -169,14 +150,38 @@ export const ChatProvider = ({ children, currentUserEmail, currentUserId: initia
   useEffect(() => {
     if (!currentUserId) return;
     
-    const newSocket = io(process.env.REACT_APP_BACKEND_URL, { 
+    // Use the same backend URL as your API calls
+    const backendUrl = process.env.REACT_APP_API_BACKEND || 'https://foodsave-backend-tdwp.onrender.com';
+    
+    console.log('Connecting to WebSocket:', backendUrl);
+    
+    const newSocket = io(backendUrl, { 
       query: { userId: currentUserId },
-      transports: ['websocket', 'polling']
+      transports: ['websocket', 'polling'],
+      timeout: 10000,
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000
     });
     
     setSocket(newSocket);
 
-    newSocket.emit('joinUser', { userId: currentUserId });
+    // Handle connection events
+    newSocket.on('connect', () => {
+      console.log('WebSocket: Connected to server successfully');
+      setIsSocketConnected(true);
+      newSocket.emit('joinUser', { userId: currentUserId });
+    });
+
+    newSocket.on('disconnect', (reason) => {
+      console.log('WebSocket: Disconnected from server:', reason);
+      setIsSocketConnected(false);
+    });
+
+    newSocket.on('connect_error', (error) => {
+      console.error('WebSocket: Connection error:', error);
+      setIsSocketConnected(false);
+    });
 
     // Handle new messages from other users
     newSocket.on('newMessage', async (msg) => {
@@ -242,32 +247,19 @@ export const ChatProvider = ({ children, currentUserEmail, currentUserId: initia
       });
     });
 
-    // Handle connection events
-    newSocket.on('connect', () => {
-      console.log('WebSocket: Connected to server');
-    });
-
-    newSocket.on('disconnect', (reason) => {
-      console.log('WebSocket: Disconnected from server:', reason);
-    });
-
-    newSocket.on('connect_error', (error) => {
-      console.error('WebSocket: Connection error:', error);
-    });
-
     return () => {
       console.log('WebSocket: Cleaning up connection');
       newSocket.disconnect();
       // Remove all event listeners
+      newSocket.off('connect');
+      newSocket.off('disconnect');
+      newSocket.off('connect_error');
       newSocket.off('newMessage');
       newSocket.off('messageDelivered');
       newSocket.off('messageRead');
       newSocket.off('onlineUsers');
       newSocket.off('userConnected');
       newSocket.off('userDisconnected');
-      newSocket.off('connect');
-      newSocket.off('disconnect');
-      newSocket.off('connect_error');
     };
   }, [currentUserId]);
 
@@ -368,9 +360,11 @@ export const ChatProvider = ({ children, currentUserEmail, currentUserId: initia
       );
 
       // 9. Emit to socket for real-time delivery to other users
-      if (socket) {
+      if (socket && isSocketConnected) {
         console.log('Emitting newMessage via WebSocket:', savedWithIv);
         socket.emit('newMessage', savedWithIv);
+      } else {
+        console.warn('WebSocket not connected, message will not be delivered in real-time');
       }
 
     } catch (err) {
@@ -393,7 +387,7 @@ export const ChatProvider = ({ children, currentUserEmail, currentUserId: initia
 
     try {
       await markChatReadService(donationId, currentUserId);
-      if (socket) {
+      if (socket && isSocketConnected) {
         console.log('Emitting messageRead via WebSocket:', { donationId, senderId: currentUserId });
         socket.emit('messageRead', { donationId, senderId: currentUserId });
       }
@@ -411,7 +405,7 @@ export const ChatProvider = ({ children, currentUserEmail, currentUserId: initia
     setChannels(prev => prev.map(msg => msg.donationid === donationId && msg.senderid !== currentUserId ? { ...msg, delivered: true } : msg));
     try {
       const result = await markDeliveredService(donationId, currentUserId);
-      if (socket) {
+      if (socket && isSocketConnected) {
         console.log('Emitting messageDelivered via WebSocket:', { donationId, userId: currentUserId });
         socket.emit('messageDelivered', { donationId, userId: currentUserId });
       }
@@ -441,7 +435,8 @@ export const ChatProvider = ({ children, currentUserEmail, currentUserId: initia
       currentUserEmail,
       currentUserId,
       socket,
-      onlineUsers
+      onlineUsers,
+      isSocketConnected
     }}>
       {children}
     </ChatContext.Provider>
