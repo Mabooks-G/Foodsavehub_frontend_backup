@@ -49,8 +49,8 @@ export const ChatProvider = ({ children, currentUserEmail, currentUserId: initia
     if (!currentUserId) return;
     
     // TEMPORARILY DISABLE SOCKET.IO
-    // console.log('Socket.IO temporarily disabled - focus on WasteAnalytics');
-    
+    console.log('Socket.IO temporarily disabled - focus on WasteAnalytics');
+    /*
     const newSocket = io(process.env.REACT_APP_BACKEND_URL, { query: { userId: currentUserId } });
     setSocket(newSocket);
 
@@ -83,7 +83,7 @@ export const ChatProvider = ({ children, currentUserEmail, currentUserId: initia
       newSocket.off('userConnected');
       newSocket.off('userDisconnected');
     };
-    
+    */
   }, [currentUserId]);
 
   /* Author: Lethabo Mazui
