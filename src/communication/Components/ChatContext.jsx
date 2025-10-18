@@ -6,6 +6,7 @@ import {
   updateChatHistory,
   markDelivered as markDeliveredService
 } from '../services/chatServices';
+import { io } from 'socket.io-client';
 
 /* Author: Lethabo Mazui
    Event: Sprint 1
@@ -14,115 +15,135 @@ import {
 */
 const ChatContext = createContext();
 
-// Encryption helper functions
-const bufToBase64 = (buffer) => btoa(String.fromCharCode(...new Uint8Array(buffer)));
-const base64ToBuf = (b64) => Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+// ----------------------------
+// Base64 helpers
+// ----------------------------
+/* Author: Lethabo Mazui
+   LatestUpdate: Added buf/base64 conversion
+   Description: Converts ArrayBuffer to base64 string
+*/
+function bufToBase64(buf) {
+  const bytes = new Uint8Array(buf);
+  let binary = '';
+  for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
+  return btoa(binary);
+}
 
-// Derive encryption key from donationId
-const deriveKey = async (donationId) => {
-  const encoder = new TextEncoder();
-  const keyMaterial = await crypto.subtle.importKey(
-    'raw',
-    encoder.encode(donationId.padEnd(32, '0').slice(0, 32)),
-    'PBKDF2',
-    false,
-    ['deriveKey']
-  );
-  
-  return crypto.subtle.deriveKey(
-    {
-      name: 'PBKDF2',
-      salt: encoder.encode('foodsave-chat-salt'),
-      iterations: 100000,
-      hash: 'SHA-256'
-    },
-    keyMaterial,
-    { name: 'AES-GCM', length: 256 },
-    false,
-    ['encrypt', 'decrypt']
-  );
-};
+/* Author: Lethabo Mazui
+   LatestUpdate: Added base64 to ArrayBuffer conversion
+   Description: Converts base64 string to ArrayBuffer
+*/
+function base64ToBuf(b64) {
+  const binary = atob(b64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return bytes.buffer;
+}
 
-// Encrypt message with derived key
-const encryptWithKey = async (key, plaintext) => {
-  const encoder = new TextEncoder();
+// ----------------------------
+// AES-GCM encryption helpers
+// ----------------------------
+/* Author: Lethabo Mazui
+   LatestUpdate: Added encryptWithKey function
+   Description: Encrypts plaintext with AES-GCM using a derived key
+*/
+async function encryptWithKey(key, plaintext) {
   const iv = crypto.getRandomValues(new Uint8Array(12));
-  const ciphertext = await crypto.subtle.encrypt(
-    { name: 'AES-GCM', iv },
-    key,
-    encoder.encode(plaintext)
+  const encoded = new TextEncoder().encode(plaintext);
+  const cipherBuffer = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, encoded);
+  return { ciphertextB64: bufToBase64(cipherBuffer), ivB64: bufToBase64(iv) };
+}
+
+// ----------------------------
+// Key derivation
+// ----------------------------
+const keyCache = new Map();
+/* Author: Lethabo Mazui
+   LatestUpdate: Added deriveKey
+   Description: Deterministically derives AES-GCM key per donationId
+*/
+async function deriveKey(donationId) {
+  if (keyCache.has(donationId)) return keyCache.get(donationId);
+  const enc = new TextEncoder();
+  const keyMaterial = await crypto.subtle.importKey(
+    "raw",
+    enc.encode(donationId),
+    "PBKDF2",
+    false,
+    ["deriveKey"]
   );
-  
-  return {
-    ciphertextB64: bufToBase64(ciphertext),
-    ivB64: bufToBase64(iv)
-  };
-};
+  const key = await crypto.subtle.deriveKey(
+    { name: "PBKDF2", salt: enc.encode("chat-e2ee"), iterations: 100000, hash: "SHA-256" },
+    keyMaterial,
+    { name: "AES-GCM", length: 256 },
+    false,
+    ["encrypt", "decrypt"]
+  );
+  keyCache.set(donationId, key);
+  return key;
+}
 
-// Decrypt message
-const decryptMessage = async (msg) => {
-  try {
-    // If message is already decrypted or is empty, return as-is
-    if (!msg.chathistory || msg.chathistory.trim() === '') {
-      return {
-        ...msg,
-        decryptedText: msg.chathistory || ''
-      };
-    }
-
-    // Try to decrypt if we have both ciphertext and IV
-    if (msg.chathistory && msg.iv) {
-      try {
-        const key = await deriveKey(msg.donationid);
-        const ciphertextBuf = base64ToBuf(msg.chathistory);
-        const ivBuf = base64ToBuf(msg.iv);
-        
-        const decrypted = await crypto.subtle.decrypt(
-          { name: 'AES-GCM', iv: ivBuf },
-          key,
-          ciphertextBuf
-        );
-        
-        const decoder = new TextDecoder();
-        const decryptedText = decoder.decode(decrypted);
-        
-        return {
-          ...msg,
-          decryptedText
-        };
-      } catch (decryptError) {
-        console.warn('Decryption failed, returning ciphertext:', decryptError);
-        // If decryption fails, return the original ciphertext
-        return {
-          ...msg,
-          decryptedText: msg.chathistory
-        };
-      }
-    }
-    
-    // If no IV or not encrypted, return as-is
-    return {
-      ...msg,
-      decryptedText: msg.chathistory
-    };
-  } catch (error) {
-    console.error('Error in decryptMessage:', error);
-    return {
-      ...msg,
-      decryptedText: msg.chathistory || '[Unable to decrypt message]'
-    };
-  }
-};
-
-// Create IV cache outside component
+// ----------------------------
+// Decryption helper
+// ----------------------------
 const ivCache = new Map();
-const readCache = new Set();
+/* Author: Lethabo Mazui
+   LatestUpdate: Added decryptMessage
+   Description: Safely decrypts message using cached key + IV
+*/
+async function decryptMessage(msg) {
+  console.log('Attempting to decrypt message:', msg.chatid);
 
+  if (!msg.chathistory || !msg.donationid) {
+    console.log('Missing required fields for decryption');
+    return { ...msg, chathistory: "" };
+  }
+
+  try {
+    // Derive AES-GCM key
+    const key = await deriveKey(msg.donationid);
+    console.log('Key derived for donation:', msg.donationid);
+
+    // Use cached IV if available, otherwise fallback (cannot reconstruct!)
+    let ivB64;
+    if (msg.iv) {
+      ivB64 = msg.iv;
+    } else if (ivCache.has(msg.chatid)) {
+      ivB64 = ivCache.get(msg.chatid);
+    } else {
+      console.warn(`IV missing for chat ${msg.chatid}, cannot decrypt`);
+      return { ...msg, chathistory: "[decryption error]" };
+    }
+
+    const rawCipher = base64ToBuf(msg.chathistory);
+    const rawIv = base64ToBuf(ivB64);
+
+    const decrypted = await crypto.subtle.decrypt(
+      { name: "AES-GCM", iv: rawIv },
+      key,
+      rawCipher
+    );
+
+    const decryptedText = new TextDecoder().decode(decrypted);
+    console.log('Successfully decrypted:', decryptedText);
+
+    return { ...msg, chathistory: decryptedText };
+
+  } catch (err) {
+    console.error(` Failed to decrypt message ${msg.chatid}:`, err);
+    return { ...msg, chathistory: "[decryption error]" };
+  }
+}
+
+// ----------------------------
+// ChatProvider component
+// ----------------------------
 export const ChatProvider = ({ children, currentUserEmail, currentUserId: initialUserId }) => {
   const [channels, setChannels] = useState([]);
   const [currentUserId, setCurrentUserId] = useState(initialUserId || null);
   const [socket, setSocket] = useState(null);
   const [onlineUsers, setOnlineUsers] = useState(new Set());
+  const readCache = new Set();
 
   /* Author: Lethabo Mazui
      LatestUpdate: Fetch stakeholderId
@@ -142,15 +163,112 @@ export const ChatProvider = ({ children, currentUserEmail, currentUserId: initia
   }, [currentUserEmail, currentUserId]);
 
   /* Author: Lethabo Mazui
-     LatestUpdate: TEMPORARILY DISABLED WebSocket connection
-     Description: Socket.IO disabled until backend is properly configured
+     LatestUpdate: WebSocket connection
+     Description: Sets up socket.io for real-time messages and online status tracking
   */
   useEffect(() => {
     if (!currentUserId) return;
     
-    // TEMPORARILY DISABLE SOCKET.IO
-    console.log('Socket.IO temporarily disabled - focus on WasteAnalytics');
-    // Socket.IO code commented out for now
+    const newSocket = io(process.env.REACT_APP_BACKEND_URL, { 
+      query: { userId: currentUserId },
+      transports: ['websocket', 'polling']
+    });
+    
+    setSocket(newSocket);
+
+    newSocket.emit('joinUser', { userId: currentUserId });
+
+    // Handle new messages from other users
+    newSocket.on('newMessage', async (msg) => {
+      console.log('WebSocket: New message received', msg);
+      
+      // Only process if this message is not from ourselves
+      if (msg.senderid !== currentUserId) {
+        try {
+          const decrypted = await decryptMessage(msg);
+          setChannels(prev => {
+            // Check if message already exists to avoid duplicates
+            const exists = prev.some(m => m.chatid === msg.chatid);
+            if (!exists) {
+              console.log('Adding new message to channels:', decrypted);
+              return [...prev, decrypted];
+            }
+            console.log('Message already exists, skipping:', msg.chatid);
+            return prev;
+          });
+        } catch (error) {
+          console.error('Error processing new message:', error);
+        }
+      }
+    });
+
+    // Handle message delivered receipts
+    newSocket.on('messageDelivered', ({ donationid, userId }) => {
+      console.log('WebSocket: Message delivered for donation', donationid);
+      setChannels(prev => prev.map(msg => 
+        msg.donationid === donationid && msg.senderid !== userId 
+          ? { ...msg, delivered: true } 
+          : msg
+      ));
+    });
+
+    // Handle message read receipts
+    newSocket.on('messageRead', ({ donationid, senderId }) => {
+      console.log('WebSocket: Message read for donation', donationid);
+      setChannels(prev => prev.map(msg => 
+        msg.donationid === donationid && msg.senderid !== senderId 
+          ? { ...msg, readreceipts: true } 
+          : msg
+      ));
+    });
+
+    // Handle online users updates
+    newSocket.on('onlineUsers', (onlineIds) => {
+      console.log('WebSocket: Online users updated', onlineIds);
+      setOnlineUsers(new Set(onlineIds));
+    });
+
+    newSocket.on('userConnected', (userId) => {
+      console.log('WebSocket: User connected', userId);
+      setOnlineUsers(prev => new Set(prev).add(userId));
+    });
+
+    newSocket.on('userDisconnected', (userId) => {
+      console.log('WebSocket: User disconnected', userId);
+      setOnlineUsers(prev => {
+        const updated = new Set(prev);
+        updated.delete(userId);
+        return updated;
+      });
+    });
+
+    // Handle connection events
+    newSocket.on('connect', () => {
+      console.log('WebSocket: Connected to server');
+    });
+
+    newSocket.on('disconnect', (reason) => {
+      console.log('WebSocket: Disconnected from server:', reason);
+    });
+
+    newSocket.on('connect_error', (error) => {
+      console.error('WebSocket: Connection error:', error);
+    });
+
+    return () => {
+      console.log('WebSocket: Cleaning up connection');
+      newSocket.disconnect();
+      // Remove all event listeners
+      newSocket.off('newMessage');
+      newSocket.off('messageDelivered');
+      newSocket.off('messageRead');
+      newSocket.off('onlineUsers');
+      newSocket.off('userConnected');
+      newSocket.off('userDisconnected');
+      newSocket.off('connect');
+      newSocket.off('disconnect');
+      newSocket.off('connect_error');
+    };
   }, [currentUserId]);
 
   /* Author: Lethabo Mazui
@@ -178,7 +296,11 @@ export const ChatProvider = ({ children, currentUserEmail, currentUserId: initia
         setChannels(prev => {
           const existingIds = prev.map(m => m.chatid);
           const newMessages = decryptedData.filter(m => !existingIds.includes(m.chatid));
-          return [...prev, ...newMessages];
+          if (newMessages.length > 0) {
+            console.log('Polling: Adding new messages:', newMessages.length);
+            return [...prev, ...newMessages];
+          }
+          return prev;
         });
       } catch (err) {
         console.error(' Polling getUserChats error:', err);
@@ -191,13 +313,15 @@ export const ChatProvider = ({ children, currentUserEmail, currentUserId: initia
   }, [currentUserEmail, currentUserId]);
 
   /* Author: Lethabo Mazui
-     LatestUpdate: Add new message (without socket emission)
-     Description: Encrypts, sends, stores locally - socket emission disabled
+     LatestUpdate: Add new message
+     Description: Encrypts, sends, stores locally, and emits via socket
   */
   const addMessage = async (senderId, text, donationId, message_timestamp) => {
     if (!donationId || !senderId || !text.trim()) return;
 
     try {
+      console.log('Sending message:', { senderId, text, donationId });
+
       // 1. Derive key first
       const key = await deriveKey(donationId);
 
@@ -243,8 +367,11 @@ export const ChatProvider = ({ children, currentUserEmail, currentUserId: initia
         )
       );
 
-      // 9. TEMPORARILY DISABLE socket emission
-      // if (socket) socket.emit('newMessage', savedWithIv);
+      // 9. Emit to socket for real-time delivery to other users
+      if (socket) {
+        console.log('Emitting newMessage via WebSocket:', savedWithIv);
+        socket.emit('newMessage', savedWithIv);
+      }
 
     } catch (err) {
       console.error(' addMessage backend error:', err);
@@ -252,7 +379,7 @@ export const ChatProvider = ({ children, currentUserEmail, currentUserId: initia
   };
 
   /* Author: Lethabo Mazui
-     LatestUpdate: Mark chat read (without socket emission)
+     LatestUpdate: Mark chat read
      Description: Marks all messages for a donation as read locally and via backend
   */
   const markChatRead = async (donationId) => {
@@ -266,15 +393,17 @@ export const ChatProvider = ({ children, currentUserEmail, currentUserId: initia
 
     try {
       await markChatReadService(donationId, currentUserId);
-      // TEMPORARILY DISABLE socket emission
-      // if (socket) socket.emit('messageRead', { donationId, senderId: currentUserId });
+      if (socket) {
+        console.log('Emitting messageRead via WebSocket:', { donationId, senderId: currentUserId });
+        socket.emit('messageRead', { donationId, senderId: currentUserId });
+      }
     } catch (err) {
       console.error(' markChatRead backend error:', err);
     }
   };
 
   /* Author: Lethabo Mazui
-     LatestUpdate: Mark chat delivered (without socket emission)
+     LatestUpdate: Mark chat delivered
      Description: Marks all messages for a donation as delivered locally and via backend
   */
   const markDelivered = async (donationId) => {
@@ -282,8 +411,10 @@ export const ChatProvider = ({ children, currentUserEmail, currentUserId: initia
     setChannels(prev => prev.map(msg => msg.donationid === donationId && msg.senderid !== currentUserId ? { ...msg, delivered: true } : msg));
     try {
       const result = await markDeliveredService(donationId, currentUserId);
-      // TEMPORARILY DISABLE socket emission
-      // if (socket) socket.emit('messageDelivered', { donationId, userId: currentUserId });
+      if (socket) {
+        console.log('Emitting messageDelivered via WebSocket:', { donationId, userId: currentUserId });
+        socket.emit('messageDelivered', { donationId, userId: currentUserId });
+      }
       return result;
     } catch (err) {
       console.error(' markDelivered backend error:', err);
@@ -309,8 +440,8 @@ export const ChatProvider = ({ children, currentUserEmail, currentUserId: initia
       getUnreadCount,
       currentUserEmail,
       currentUserId,
-      socket: null, // Set to null since socket is disabled
-      onlineUsers: new Set() // Empty set since we're not tracking online users
+      socket,
+      onlineUsers
     }}>
       {children}
     </ChatContext.Provider>
