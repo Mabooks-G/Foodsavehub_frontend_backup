@@ -44,19 +44,19 @@ const WasteAnalyses = ({ currentUser }) => {
         setError("User email not available");
         return;
       }
-
-      // Fetch all data in parallel
+  
+      // Fetch all data - UPDATED PATHS
       const [statsResponse, chartResponse] = await Promise.all([
-        fetch(`${API_BACKEND}/api/waste/stats?email=${email}`),
-        fetch(`${API_BACKEND}/api/waste/${timePeriod}?email=${email}`)
+        fetch(`${API_BACKEND}/api/wasteanalyses/stats?email=${email}`), // CHANGED
+        fetch(`${API_BACKEND}/api/wasteanalyses/${timePeriod}?email=${email}`) // CHANGED
       ]);
-
+  
       if (!statsResponse.ok) throw new Error('Failed to fetch waste statistics');
       if (!chartResponse.ok) throw new Error(`Failed to fetch ${timePeriod} data`);
-
+  
       const statsData = await statsResponse.json();
       const chartData = await chartResponse.json();
-
+  
       setTotalStats(statsData);
       setChartData(chartData);
     } catch (err) {
@@ -66,7 +66,7 @@ const WasteAnalyses = ({ currentUser }) => {
       setLoading(false);
     }
   };
-
+  
   // Chart rendering functions
   const renderPieChart = () => {
     const pieData = [
