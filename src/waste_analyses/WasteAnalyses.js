@@ -303,7 +303,7 @@ const WasteAnalyses = ({ currentUser }) => {
         </div>
       )}
 
-      {/* Total Statistics */}
+      {/* Total Statistics - AT THE TOP */}
       <div className="total-stats">
         <div className="stat-card used">
           <div className="stat-icon">✅</div>
@@ -334,93 +334,99 @@ const WasteAnalyses = ({ currentUser }) => {
         </div>
       </div>
 
-      {/* Chart Controls */}
+      {/* Chart Controls - BELOW STATISTICS */}
       <div className="chart-controls">
-        {/* Chart Type Buttons */}
-        <div className="control-group">
-          <label>Chart Type</label>
-          <div className="button-group">
-            <button 
-              className={`chart-btn ${chartType === "pie" ? "active" : ""}`}
-              onClick={() => setChartType("pie")}
-            >
-              Pie Chart
-            </button>
-            <button 
-              className={`chart-btn ${chartType === "bar" ? "active" : ""}`}
-              onClick={() => setChartType("bar")}
-            >
-              Bar Chart
-            </button>
-            <button 
-              className={`chart-btn ${chartType === "line" ? "active" : ""}`}
-              onClick={() => setChartType("line")}
-            >
-              Line Chart
-            </button>
-          </div>
-        </div>
-
-        {/* Time Period Buttons */}
-        <div className="control-group">
-          <label>Time Period</label>
-          <div className="button-group">
-            <button 
-              className={`period-btn ${timePeriod === "weekly" ? "active" : ""}`}
-              onClick={() => setTimePeriod("weekly")}
-            >
-              Weekly
-            </button>
-            <button 
-              className={`period-btn ${timePeriod === "monthly" ? "active" : ""}`}
-              onClick={() => setTimePeriod("monthly")}
-            >
-              Monthly
-            </button>
-          </div>
-        </div>
-
-        {/* Data Scope Buttons */}
-        <div className="control-group">
-          <label>Data Scope</label>
-          <div className="button-group">
-            <button 
-              className={`scope-btn ${dataScope === "personal" ? "active" : ""}`}
-              onClick={() => setDataScope("personal")}
-            >
-              Personal
-            </button>
-            <button 
-              className={`scope-btn ${dataScope === "regional" ? "active" : ""}`}
-              onClick={() => setDataScope("regional")}
-            >
-              Regional
-            </button>
-          </div>
-        </div>
-
-        {/* Region Selector (only show for regional data) */}
-        {dataScope === "regional" && (
+        <div className="controls-grid">
+          {/* Chart Type */}
           <div className="control-group">
-            <label>Region</label>
-            <select 
-              value={region} 
-              onChange={(e) => setRegion(e.target.value)}
-              className="region-select"
-            >
-              {VALID_REGIONS.map(reg => (
-                <option key={reg} value={reg}>{reg}</option>
-              ))}
-            </select>
+            <label className="control-label">Chart Type</label>
+            <div className="button-group">
+              <button 
+                className={`chart-btn ${chartType === "pie" ? "active" : ""}`}
+                onClick={() => setChartType("pie")}
+              >
+                Pie
+              </button>
+              <button 
+                className={`chart-btn ${chartType === "bar" ? "active" : ""}`}
+                onClick={() => setChartType("bar")}
+              >
+                Bar
+              </button>
+              <button 
+                className={`chart-btn ${chartType === "line" ? "active" : ""}`}
+                onClick={() => setChartType("line")}
+              >
+                Line
+              </button>
+            </div>
           </div>
-        )}
 
-        <button className="refresh-btn" onClick={fetchAllData}>
-          Refresh Data
-        </button>
+          {/* Time Period */}
+          <div className="control-group">
+            <label className="control-label">Period</label>
+            <div className="button-group">
+              <button 
+                className={`period-btn ${timePeriod === "weekly" ? "active" : ""}`}
+                onClick={() => setTimePeriod("weekly")}
+              >
+                Weekly
+              </button>
+              <button 
+                className={`period-btn ${timePeriod === "monthly" ? "active" : ""}`}
+                onClick={() => setTimePeriod("monthly")}
+              >
+                Monthly
+              </button>
+            </div>
+          </div>
+
+          {/* Data Scope */}
+          <div className="control-group">
+            <label className="control-label">Scope</label>
+            <div className="button-group">
+              <button 
+                className={`scope-btn ${dataScope === "personal" ? "active" : ""}`}
+                onClick={() => setDataScope("personal")}
+              >
+                Personal
+              </button>
+              <button 
+                className={`scope-btn ${dataScope === "regional" ? "active" : ""}`}
+                onClick={() => setDataScope("regional")}
+              >
+                Regional
+              </button>
+            </div>
+          </div>
+
+          {/* Region Selector */}
+          {dataScope === "regional" && (
+            <div className="control-group">
+              <label className="control-label">Region</label>
+              <select 
+                value={region} 
+                onChange={(e) => setRegion(e.target.value)}
+                className="region-select"
+              >
+                {VALID_REGIONS.map(reg => (
+                  <option key={reg} value={reg}>{reg}</option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {/* Refresh Button */}
+          <div className="control-group">
+            <label className="control-label">&nbsp;</label>
+            <button className="refresh-btn" onClick={fetchAllData}>
+              Refresh
+            </button>
+          </div>
+        </div>
       </div>
 
-      {/* Chart Container */}
+      {/* Chart Container - BELOW CONTROLS */}
       <div className="chart-container">
         <div className="chart-header">
           <h2>{getChartTitle()}</h2>
@@ -436,7 +442,7 @@ const WasteAnalyses = ({ currentUser }) => {
         {renderChart()}
       </div>
 
-      {/* Data Summary */}
+      {/* Data Summary - AT THE BOTTOM */}
       <div className="data-summary">
         <h3>Performance Summary</h3>
         <div className="summary-grid">

@@ -1,18 +1,120 @@
 /* Waste Analysis Dashboard Styles */
-/* Add to WasteAnalyses.css */
+.waste-analysis-container {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.dashboard-header h1 {
+  color: #1F2937;
+  margin: 0;
+  font-size: 2rem;
+}
+
+.last-updated {
+  color: #6B7280;
+  font-size: 0.9rem;
+}
+
+/* Total Statistics */
+.total-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border-left: 4px solid;
+}
+
+.stat-card.used {
+  border-left-color: #4CAF50;
+}
+
+.stat-card.wasted {
+  border-left-color: #F44336;
+}
+
+.stat-card.total {
+  border-left-color: #FF9800;
+}
+
+.stat-icon {
+  font-size: 2rem;
+}
+
+.stat-content {
+  flex: 1;
+}
+
+.stat-number {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #1F2937;
+  margin-bottom: 0.25rem;
+}
+
+.stat-label {
+  color: #6B7280;
+  font-size: 0.9rem;
+}
+
+/* Chart Controls */
+.chart-controls {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+}
+
+.controls-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  align-items: end;
+}
+
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.control-label {
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.9rem;
+  margin-bottom: 0.25rem;
+}
 
 /* Button Groups */
 .button-group {
   display: flex;
-  gap: 8px;
+  gap: 4px;
   background: #f8f9fa;
   padding: 4px;
   border-radius: 8px;
   border: 1px solid #e9ecef;
 }
 
-.chart-btn, .period-btn {
-  padding: 8px 16px;
+.chart-btn, .period-btn, .scope-btn {
+  padding: 8px 12px;
   border: none;
   border-radius: 6px;
   background: transparent;
@@ -22,69 +124,186 @@
   cursor: pointer;
   transition: all 0.2s ease;
   flex: 1;
-  min-width: 80px;
+  min-width: 60px;
 }
 
-.chart-btn:hover, .period-btn:hover {
+.chart-btn:hover, .period-btn:hover, .scope-btn:hover {
   background: #e9ecef;
   color: #495057;
 }
 
-.chart-btn.active, .period-btn.active {
+.chart-btn.active, .period-btn.active, .scope-btn.active {
   background: #4c6ef5;
   color: white;
   box-shadow: 0 2px 4px rgba(76, 110, 245, 0.3);
 }
 
-/* Make period buttons closer together */
-.control-group:last-child .button-group {
-  gap: 4px;
-}
-
-/* Additional Button Styles */
-.scope-btn {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 6px;
-  background: transparent;
-  color: #6c757d;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  flex: 1;
-  min-width: 80px;
-}
-
-.scope-btn:hover {
-  background: #e9ecef;
-  color: #495057;
-}
-
 .scope-btn.active {
   background: #FF9800;
-  color: white;
   box-shadow: 0 2px 4px rgba(255, 152, 0, 0.3);
 }
 
 .region-select {
   padding: 8px 12px;
   border: 1px solid #ced4da;
-  border-radius: 5px;
+  border-radius: 6px;
   background: white;
   font-size: 14px;
   min-width: 200px;
 }
 
-/* Responsive adjustments */
+.refresh-btn {
+  padding: 8px 16px;
+  background: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.refresh-btn:hover {
+  background: #45a049;
+}
+
+/* Chart Container */
+.chart-container {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.chart-header h2 {
+  margin: 0;
+  color: #1F2937;
+  font-size: 1.5rem;
+}
+
+.chart-summary {
+  color: #6B7280;
+  font-size: 0.9rem;
+}
+
+/* Data Summary */
+.data-summary {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.data-summary h3 {
+  margin: 0 0 1rem 0;
+  color: #1F2937;
+  font-size: 1.25rem;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.summary-label {
+  color: #6B7280;
+  font-weight: 500;
+}
+
+.summary-value {
+  color: #1F2937;
+  font-weight: 600;
+}
+
+/* Error and Loading States */
+.error-banner {
+  background: #FEE2E2;
+  color: #DC2626;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.retry-btn {
+  background: #DC2626;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.loading {
+  text-align: center;
+  padding: 3rem;
+  color: #6B7280;
+}
+
+.spinner {
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #4CAF50;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.no-data {
+  text-align: center;
+  padding: 3rem;
+  color: #6B7280;
+}
+
+.no-data-msg {
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+/* Responsive Design */
 @media (max-width: 768px) {
-  .chart-controls {
-    flex-direction: column;
-    align-items: stretch;
+  .waste-analysis-container {
+    padding: 1rem;
   }
   
-  .control-group {
-    width: 100%;
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .total-stats {
+    grid-template-columns: 1fr;
+  }
+  
+  .controls-grid {
+    grid-template-columns: 1fr;
   }
   
   .region-select {
@@ -92,7 +311,13 @@
     width: 100%;
   }
   
-  .button-group {
-    flex-direction: row;
+  .chart-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .summary-grid {
+    grid-template-columns: 1fr;
   }
 }
