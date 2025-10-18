@@ -251,10 +251,10 @@
     transform: scale(0);
   }
   
-  /* =========================
-     Mobile Responsive Design - FIXED
-     ========================= */
-  @media (max-width: 768px) {
+/* =========================
+   Mobile Responsive Design - FIXED
+   ========================= */
+   @media (max-width: 768px) {
     .navbar {
       width: 0;
       overflow: hidden;
@@ -272,39 +272,43 @@
       display: flex;
     }
   
-    /* Hamburger button - ALWAYS VISIBLE AND CLICKABLE */
+    /* HAMBURGER FIX: Make it independent of navbar width */
     .hamburger-btn {
-      position: fixed;
-      top: 1rem;
-      left: 1rem;
-      z-index: 1100;
-      font-size: 1.8rem;
-      background: var(--accent-gradient);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      padding: 0.8rem;
-      border-radius: 50%;
-      background-color: rgba(255, 255, 255, 0.95);
-      box-shadow: var(--shadow);
-      width: 50px;
-      height: 50px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
+      position: fixed !important;
+      top: 1rem !important;
+      left: 1rem !important;
+      z-index: 1100 !important;
+      font-size: 1.8rem !important;
+      background: var(--accent-gradient) !important;
+      -webkit-background-clip: text !important;
+      -webkit-text-fill-color: transparent !important;
+      background-clip: text !important;
+      padding: 0.8rem !important;
+      border-radius: 50% !important;
+      background-color: rgba(255, 255, 255, 0.95) !important;
+      box-shadow: var(--shadow) !important;
+      width: 50px !important;
+      height: 50px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      cursor: pointer !important;
+      /* Force visibility */
+      visibility: visible !important;
+      opacity: 1 !important;
+      transform: none !important;
     }
   
     /* Hamburger icon for mobile */
     .hamburger-btn::before {
-      content: "≡";
-      font-size: 2rem;
-      font-weight: bold;
+      content: "≡" !important;
+      font-size: 2rem !important;
+      font-weight: bold !important;
     }
   
     .navbar.expanded .hamburger-btn::before {
-      content: "×";
-      font-size: 2.2rem;
+      content: "×" !important;
+      font-size: 2.2rem !important;
     }
   
     .main-content {
