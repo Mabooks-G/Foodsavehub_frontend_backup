@@ -222,12 +222,12 @@
     width: 100%;
     justify-content: center;
     transition: all 0.3s ease;
-    box-shadow: 0 2px 4px rgba(139, 92, 246, 0.2);
+    box-shadow: 0 2px 4px rgb(229, 233, 31);
   }
   
   .logout-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(139, 92, 246, 0.3);
+    box-shadow: 0 4px 8px rgba(224, 221, 24, 0.808);
   }
   
   /* Hide logout label when collapsed */
@@ -244,7 +244,7 @@
     .navbar {
       width: 0;
       overflow: hidden;
-      background: rgba(255, 255, 255, 0.95);
+      background: rgba(164, 151, 223, 0.95);
       backdrop-filter: blur(10px);
     }
   
@@ -269,7 +269,7 @@
       background-clip: text;
       padding: 0.5rem;
       border-radius: 50%;
-      background-color: rgba(255, 255, 255, 0.9);
+      background-color: rgba(158, 177, 238, 0.9);
       box-shadow: var(--shadow);
     }
   
@@ -304,7 +304,7 @@
   }
   
   .navbar::-webkit-scrollbar-track {
-    background: #f1f1f1;
+    background: #7b65dd;
   }
   
   .navbar::-webkit-scrollbar-thumb {
