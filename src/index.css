@@ -70,7 +70,7 @@
   }
   
   /* =========================
-     Hamburger Menu - ALWAYS VISIBLE
+     Hamburger Menu - DESKTOP (inside sidebar)
      ========================= */
   .hamburger-btn {
     cursor: pointer;
@@ -251,10 +251,10 @@
     transform: scale(0);
   }
   
-/* =========================
-   Mobile Responsive Design - FIXED
-   ========================= */
-   @media (max-width: 768px) {
+  /* =========================
+     Mobile Responsive Design - FIXED
+     ========================= */
+  @media (max-width: 768px) {
     .navbar {
       width: 0;
       overflow: hidden;
@@ -272,7 +272,7 @@
       display: flex;
     }
   
-    /* HAMBURGER FIX: Make it independent of navbar width */
+    /* HAMBURGER FIX: Mobile-specific positioning */
     .hamburger-btn {
       position: fixed !important;
       top: 1rem !important;
@@ -293,10 +293,11 @@
       align-items: center !important;
       justify-content: center !important;
       cursor: pointer !important;
-      /* Force visibility */
-      visibility: visible !important;
-      opacity: 1 !important;
-      transform: none !important;
+    }
+  
+    /* Hide desktop hamburger inside navbar on mobile */
+    .navbar .hamburger-btn {
+      display: none !important;
     }
   
     /* Hamburger icon for mobile */
@@ -306,7 +307,7 @@
       font-weight: bold !important;
     }
   
-    .navbar.expanded .hamburger-btn::before {
+    .navbar.expanded ~ .hamburger-btn::before {
       content: "×" !important;
       font-size: 2.2rem !important;
     }
@@ -335,6 +336,21 @@
   
     .navbar.expanded .sidebar-footer {
       padding: 1rem;
+    }
+  }
+  
+  /* =========================
+     Desktop Styles - Hide mobile hamburger
+     ========================= */
+  @media (min-width: 769px) {
+    /* Hide the hamburger that's outside navbar on desktop */
+    .navbar ~ .hamburger-btn {
+      display: none;
+    }
+    
+    /* Show the hamburger inside navbar on desktop */
+    .navbar .hamburger-btn {
+      display: block;
     }
   }
   

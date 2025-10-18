@@ -204,7 +204,6 @@ toggleSidebar = () => {
 renderSidebar() {
   const { unreadCount, sidebarCollapsed, isMobile, donationsNotifications, pushEnabled } = this.state;
 
-  // For mobile: always show expanded when not collapsed
   const sidebarClass = isMobile 
     ? sidebarCollapsed ? "collapsed" : "expanded"
     : sidebarCollapsed ? "collapsed" : "expanded";
@@ -216,18 +215,22 @@ renderSidebar() {
           m => !m.readreceipts && m.senderid !== currentUserId
         ).length;
 
-        // If pushEnabled is false, force unreadMessagesCount to 0
         if (!pushEnabled) unreadMessagesCount = 0;
 
         return (
           <>
-            {/* Hamburger button OUTSIDE the navbar - ALWAYS VISIBLE */}
+            {/* Mobile Hamburger - OUTSIDE navbar (only visible on mobile) */}
             <div className="hamburger-btn" onClick={this.toggleSidebar}>
               {sidebarCollapsed ? "≡" : "×"}
             </div>
 
-            {/* Navbar - separate from hamburger button */}
+            {/* Navbar with Desktop Hamburger inside */}
             <nav className={`navbar ${sidebarClass}`}>
+              {/* Desktop Hamburger - INSIDE navbar (only visible on desktop) */}
+              <div className="hamburger-btn" onClick={this.toggleSidebar}>
+                {sidebarCollapsed ? "≡" : "×"}
+              </div>
+
               {/* Navigation links - conditionally show on mobile when expanded */}
               {(isMobile && sidebarCollapsed) ? null : (
                 <>
