@@ -2,9 +2,10 @@
    CSS Variables for New Theme
    ========================= */
    :root {
-    --primary-purple: #8B5CF6;
-    --primary-pink: #EC4899;
-    --accent-gradient: linear-gradient(135deg, #8B5CF6, #EC4899);
+    --primary-yellow: #FFD700;
+    --primary-orange: #FF8C00;
+    --accent-yellow: #FFF9C4;
+    --accent-gradient: linear-gradient(135deg, #FFD700, #FF8C00);
     --sidebar-bg: #FFFFFF;
     --card-bg: #FFFFFF;
     --background: #F8FAFC;
@@ -69,7 +70,7 @@
   }
   
   /* =========================
-     Hamburger Menu
+     Hamburger Menu - ALWAYS VISIBLE
      ========================= */
   .hamburger-btn {
     cursor: pointer;
@@ -80,11 +81,24 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    transition: transform 0.2s ease;
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 1001;
   }
   
   .hamburger-btn:hover {
     transform: scale(1.1);
+  }
+  
+  /* Hamburger icon using CSS (replaces emoji) */
+  .hamburger-btn::before {
+    content: "≡";
+    font-size: 1.8rem;
+    font-weight: bold;
+  }
+  
+  .navbar.expanded .hamburger-btn::before {
+    content: "×";
   }
   
   /* =========================
@@ -126,8 +140,8 @@
   }
   
   .nav-links a:hover {
-    background: linear-gradient(135deg, #8B5CF610, #EC489910);
-    color: var(--primary-purple);
+    background: linear-gradient(135deg, #FFD70010, #FF8C0010);
+    color: var(--primary-orange);
     transform: translateX(5px);
   }
   
@@ -137,8 +151,8 @@
   
   /* Active link state */
   .nav-links a.active {
-    background: linear-gradient(135deg, #8B5CF615, #EC489915);
-    color: var(--primary-purple);
+    background: linear-gradient(135deg, #FFD70015, #FF8C0015);
+    color: var(--primary-orange);
     font-weight: 600;
   }
   
@@ -222,12 +236,12 @@
     width: 100%;
     justify-content: center;
     transition: all 0.3s ease;
-    box-shadow: 0 2px 4px rgb(229, 233, 31);
+    box-shadow: 0 2px 4px rgba(255, 140, 0, 0.2);
   }
   
   .logout-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(224, 221, 24, 0.808);
+    box-shadow: 0 4px 8px rgba(255, 140, 0, 0.3);
   }
   
   /* Hide logout label when collapsed */
@@ -238,13 +252,13 @@
   }
   
   /* =========================
-     Mobile Responsive Design
+     Mobile Responsive Design - FIXED
      ========================= */
   @media (max-width: 768px) {
     .navbar {
       width: 0;
       overflow: hidden;
-      background: rgba(164, 151, 223, 0.95);
+      background: rgba(255, 255, 255, 0.98);
       backdrop-filter: blur(10px);
     }
   
@@ -252,30 +266,51 @@
       width: 280px;
     }
   
-    .nav-links,
-    .sidebar-footer {
+    /* Ensure nav links and footer are visible when sidebar is expanded */
+    .navbar.expanded .nav-links,
+    .navbar.expanded .sidebar-footer {
       display: flex;
     }
   
+    /* Hamburger button - ALWAYS VISIBLE AND CLICKABLE */
     .hamburger-btn {
       position: fixed;
       top: 1rem;
       left: 1rem;
       z-index: 1100;
-      font-size: 1.6rem;
+      font-size: 1.8rem;
       background: var(--accent-gradient);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      padding: 0.5rem;
+      padding: 0.8rem;
       border-radius: 50%;
-      background-color: rgba(158, 177, 238, 0.9);
+      background-color: rgba(255, 255, 255, 0.95);
       box-shadow: var(--shadow);
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+  
+    /* Hamburger icon for mobile */
+    .hamburger-btn::before {
+      content: "≡";
+      font-size: 2rem;
+      font-weight: bold;
+    }
+  
+    .navbar.expanded .hamburger-btn::before {
+      content: "×";
+      font-size: 2.2rem;
     }
   
     .main-content {
       margin-left: 0;
       padding: 1rem;
+      padding-top: 4rem; /* Add space for the fixed hamburger */
     }
   
     .navbar.expanded ~ .main-content {
@@ -286,6 +321,16 @@
     .notification-badge {
       left: 30px;
       top: 10px;
+    }
+  
+    /* Ensure sidebar content is properly positioned */
+    .navbar.expanded .nav-links {
+      margin-top: 3rem;
+      padding: 1rem;
+    }
+  
+    .navbar.expanded .sidebar-footer {
+      padding: 1rem;
     }
   }
   
@@ -304,14 +349,34 @@
   }
   
   .navbar::-webkit-scrollbar-track {
-    background: #7b65dd;
+    background: #f1f1f1;
   }
   
   .navbar::-webkit-scrollbar-thumb {
-    background: var(--primary-purple);
+    background: var(--primary-orange);
     border-radius: 10px;
   }
   
   .navbar::-webkit-scrollbar-thumb:hover {
-    background: var(--primary-pink);
+    background: var(--primary-yellow);
+  }
+  
+  /* =========================
+     Additional Yellow/Orange Accents
+     ========================= */
+  /* Add subtle yellow background to active notifications */
+  .notification-link.active {
+    background: var(--accent-yellow);
+  }
+  
+  /* Yellow highlight for important items */
+  .highlight-yellow {
+    background: linear-gradient(135deg, #FFD70020, #FF8C0020);
+    border-left: 3px solid var(--primary-yellow);
+  }
+  
+  /* Orange accent for urgent items */
+  .highlight-orange {
+    background: linear-gradient(135deg, #FF8C0020, #FF450020);
+    border-left: 3px solid var(--primary-orange);
   }
