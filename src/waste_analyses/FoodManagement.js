@@ -7,7 +7,7 @@
 
 import React, { useState, useEffect } from 'react';
 import './FoodManagement.css';
-const API_BACKEND = process.env.REACT_APP_API_BACKEND;
+const API_BACKEND = process.env.REACT_APP_API_BACKEND || "https://foodsave-backend-tdwp.onrender.com";
 
 const FoodManagement = ({ currentUser }) => {
   const [foodItems, setFoodItems] = useState([]);
