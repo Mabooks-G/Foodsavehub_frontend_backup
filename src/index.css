@@ -72,7 +72,7 @@
   /* =========================
      Hamburger Menu - DESKTOP (inside sidebar)
      ========================= */
-  .hamburger-btn {
+  .desktop-hamburger {
     cursor: pointer;
     font-size: 1.5rem;
     padding: 1.5rem 0;
@@ -86,18 +86,59 @@
     z-index: 1001;
   }
   
-  .hamburger-btn:hover {
+  .desktop-hamburger:hover {
     transform: scale(1.1);
   }
   
-  /* Hamburger icon using CSS (replaces emoji) */
-  .hamburger-btn::before {
+  /* Hamburger icon using CSS */
+  .desktop-hamburger::before {
     content: "≡";
     font-size: 1.8rem;
     font-weight: bold;
   }
   
-  .navbar.expanded .hamburger-btn::before {
+  .navbar.expanded .desktop-hamburger::before {
+    content: "×";
+  }
+  
+  /* =========================
+     Mobile Hamburger (fixed position)
+     ========================= */
+  .mobile-hamburger {
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 1100;
+    font-size: 1.8rem;
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    padding: 0.8rem;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.95);
+    box-shadow: var(--shadow);
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .mobile-hamburger:hover {
+    transform: scale(1.1);
+  }
+  
+  .mobile-hamburger::before {
+    content: "≡";
+    font-size: 2rem;
+    font-weight: bold;
+  }
+  
+  /* When navbar is expanded on mobile, change to X */
+  .navbar.expanded ~ .mobile-hamburger::before {
     content: "×";
   }
   
@@ -252,7 +293,7 @@
   }
   
   /* =========================
-     Mobile Responsive Design - FIXED
+     Mobile Responsive Design
      ========================= */
   @media (max-width: 768px) {
     .navbar {
@@ -266,50 +307,20 @@
       width: 280px;
     }
   
+    /* Hide desktop hamburger on mobile */
+    .desktop-hamburger {
+      display: none !important;
+    }
+  
+    /* Show mobile hamburger */
+    .mobile-hamburger {
+      display: flex !important;
+    }
+  
     /* Ensure nav links and footer are visible when sidebar is expanded */
     .navbar.expanded .nav-links,
     .navbar.expanded .sidebar-footer {
       display: flex;
-    }
-  
-    /* HAMBURGER FIX: Mobile-specific positioning */
-    .hamburger-btn {
-      position: fixed !important;
-      top: 1rem !important;
-      left: 1rem !important;
-      z-index: 1100 !important;
-      font-size: 1.8rem !important;
-      background: var(--accent-gradient) !important;
-      -webkit-background-clip: text !important;
-      -webkit-text-fill-color: transparent !important;
-      background-clip: text !important;
-      padding: 0.8rem !important;
-      border-radius: 50% !important;
-      background-color: rgba(255, 255, 255, 0.95) !important;
-      box-shadow: var(--shadow) !important;
-      width: 50px !important;
-      height: 50px !important;
-      display: flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-      cursor: pointer !important;
-    }
-  
-    /* Hide desktop hamburger inside navbar on mobile */
-    .navbar .hamburger-btn {
-      display: none !important;
-    }
-  
-    /* Hamburger icon for mobile */
-    .hamburger-btn::before {
-      content: "≡" !important;
-      font-size: 2rem !important;
-      font-weight: bold !important;
-    }
-  
-    .navbar.expanded ~ .hamburger-btn::before {
-      content: "×" !important;
-      font-size: 2.2rem !important;
     }
   
     .main-content {
@@ -340,16 +351,16 @@
   }
   
   /* =========================
-     Desktop Styles - Hide mobile hamburger
+     Desktop Styles
      ========================= */
   @media (min-width: 769px) {
-    /* Hide the hamburger that's outside navbar on desktop */
-    .navbar ~ .hamburger-btn {
-      display: none;
+    /* Hide mobile hamburger on desktop */
+    .mobile-hamburger {
+      display: none !important;
     }
     
-    /* Show the hamburger inside navbar on desktop */
-    .navbar .hamburger-btn {
+    /* Show desktop hamburger */
+    .desktop-hamburger {
       display: block;
     }
   }

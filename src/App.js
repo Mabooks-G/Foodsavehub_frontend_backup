@@ -219,17 +219,21 @@ renderSidebar() {
 
         return (
           <>
-            {/* Mobile Hamburger - OUTSIDE navbar (only visible on mobile) */}
-            <div className="hamburger-btn" onClick={this.toggleSidebar}>
-              {sidebarCollapsed ? "≡" : "×"}
-            </div>
+            {/* Mobile Hamburger - ONLY visible on mobile */}
+            {isMobile && (
+              <div className="mobile-hamburger" onClick={this.toggleSidebar}>
+                {sidebarCollapsed ? "≡" : "×"}
+              </div>
+            )}
 
             {/* Navbar with Desktop Hamburger inside */}
             <nav className={`navbar ${sidebarClass}`}>
-              {/* Desktop Hamburger - INSIDE navbar (only visible on desktop) */}
-              <div className="hamburger-btn" onClick={this.toggleSidebar}>
-                {sidebarCollapsed ? "≡" : "×"}
-              </div>
+              {/* Desktop Hamburger - ONLY visible on desktop */}
+              {!isMobile && (
+                <div className="desktop-hamburger" onClick={this.toggleSidebar}>
+                  {sidebarCollapsed ? "≡" : "×"}
+                </div>
+              )}
 
               {/* Navigation links - conditionally show on mobile when expanded */}
               {(isMobile && sidebarCollapsed) ? null : (
@@ -292,8 +296,6 @@ renderSidebar() {
     </ChatContext>
   );
 }
-
-
   /* ------------------------------
      Main Render
   ------------------------------ */
