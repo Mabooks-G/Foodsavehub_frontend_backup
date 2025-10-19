@@ -93,50 +93,64 @@ const FoodManagement = ({ currentUser }) => {
     }
   };
 
-  /* Author: Gift Mabokela
-     Event: Sprint 2
-     LatestUpdate: 2025/09/18 - Auto-use region, no city prompt needed
-     Description: Mark food item as used
-     Returns: void
-  */
-  const markAsUsed = async (foodItemId, currentQuantity) => {
-    try {
-      const quantityUsed = prompt(`How many items were used? (Available: ${currentQuantity})`, currentQuantity);
-      
-      if (!quantityUsed || isNaN(quantityUsed) || quantityUsed <= 0) {
-        alert('Please enter a valid quantity');
-        return;
-      }
-
-      if (parseInt(quantityUsed) > currentQuantity) {
-        alert('Quantity used cannot exceed available quantity');
-        return;
-      }
-
-      const response = await fetch(`${API_BACKEND}/api/foodmanagement/mark-used/${foodItemId}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          quantityUsed: parseInt(quantityUsed),
-          email: currentUser?.email
-          // City will be auto-detected from user's region
-        })
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        alert(`${result.message}`);
-        fetchFoodItems();
-        fetchWasteStats();
-      } else {
-        const error = await response.json();
-        alert(error.error || 'Failed to mark as used');
-      }
-    } catch (err) {
-      alert('Error marking item as used');
-      console.error('Error:', err);
+/* Author: Gift Mabokela
+   Event: Sprint 2
+   LatestUpdate: 2025/09/18 - Auto-use region, no city prompt needed
+   Description: Mark food item as used
+   Returns: void
+*/
+const markAsUsed = async (foodItemId, currentQuantity) => {
+  try {
+    const quantityUsed = prompt(`How many items were used? (Available: ${currentQuantity})`, currentQuantity);
+    
+    if (!quantityUsed || isNaN(quantityUsed) || quantityUsed <= 0) {
+      alert('Please enter a valid quantity');
+      return;
     }
-  };
+
+    if (parseInt(quantityUsed) > currentQuantity) {
+      alert('Quantity used cannot exceed available quantity');
+      return;
+    }
+
+    console.log(`Marking item ${foodItemId} as used with quantity ${quantityUsed}`);
+
+    const response = await fetch(`${API_BACKEND}/api/foodmanagement/mark-used/${foodItemId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        quantityUsed: parseInt(quantityUsed),
+        email: currentUser?.email
+      })
+    });
+
+    console.log('Response status:', response.status);
+
+    if (response.ok) {
+      const result = await response.json();
+      alert(`${result.message}`);
+      fetchFoodItems();
+      fetchWasteStats();
+    } else {
+      // Try to get more detailed error information
+      const errorText = await response.text();
+      console.error('Server error response:', errorText);
+      
+      let errorMessage = 'Failed to mark as used';
+      try {
+        const errorData = JSON.parse(errorText);
+        errorMessage = errorData.error || errorData.details || errorMessage;
+      } catch (e) {
+        errorMessage = errorText || `Server error: ${response.status}`;
+      }
+      
+      alert(errorMessage);
+    }
+  } catch (err) {
+    console.error('Network error:', err);
+    alert('Network error marking item as used');
+  }
+};
 
   /* Author: Gift Mabokela
      Event: Sprint 2
