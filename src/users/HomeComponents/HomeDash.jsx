@@ -78,7 +78,6 @@ export default function HomeDash({ currentUser, onAddNew, navbarExpanded }) {
   };
   const handleCancelDelete = () => setDeleteConfirmId(null);
 
-
 // --- Mark as Used ---
 const markAsUsed = async (foodItemId, currentQuantity) => {
   const quantityUsed = prompt(
@@ -90,14 +89,11 @@ const markAsUsed = async (foodItemId, currentQuantity) => {
     return;
   }
   try {
-    console.log("[DEBUG] markAsUsed called with:", { foodItemId, currentQuantity });
-    console.log("[DEBUG] User entered quantityUsed:", quantityUsed);
-
     await axios.post(`${API_BACKEND}/api/foodmanagement/mark-used/${foodItemId}`, {
       quantityUsed: parseInt(quantityUsed),
-      email: currentUser.email
+      email: currentUser.email,
+      city: currentUser.region || "Durban, KwaZulu-Natal"
     });
-
     fetchFoodItems();
   } catch (err) {
     console.error("[DEBUG] markAsUsed error:", err);
@@ -116,14 +112,11 @@ const markAsWasted = async (foodItemId, currentQuantity) => {
     return;
   }
   try {
-    console.log("[DEBUG] markAsWasted called with:", { foodItemId, currentQuantity });
-    console.log("[DEBUG] User entered quantityWasted:", quantityWasted);
-
     await axios.post(`${API_BACKEND}/api/foodmanagement/mark-wasted/${foodItemId}`, {
       quantityWasted: parseInt(quantityWasted),
-      email: currentUser.email
+      email: currentUser.email,
+      city: currentUser.region || "Durban, KwaZulu-Natal"
     });
-
     fetchFoodItems();
   } catch (err) {
     console.error("[DEBUG] markAsWasted error:", err);
