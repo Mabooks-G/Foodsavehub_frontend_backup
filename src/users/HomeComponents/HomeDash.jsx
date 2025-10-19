@@ -78,41 +78,57 @@ export default function HomeDash({ currentUser, onAddNew, navbarExpanded }) {
   };
   const handleCancelDelete = () => setDeleteConfirmId(null);
 
-  // --- NEW: Mark as Used ---
-  const markAsUsed = async (foodItemId, currentQuantity) => {
-    const quantityUsed = prompt(`How many items were used? (Available: ${currentQuantity})`, currentQuantity);
-    if (!quantityUsed || isNaN(quantityUsed) || quantityUsed <= 0 || quantityUsed > currentQuantity) {
-      alert('Invalid quantity'); return;
-    }
-    try {
-      await axios.post(`${API_BACKEND}/api/foodmanagement/mark-used/${foodItemId}`, {
-        quantityUsed: parseInt(quantityUsed),
-        email: currentUser.email
-      });
-      fetchFoodItems();
-    } catch (err) {
-      console.error(err);
-      alert('Failed to mark as used');
-    }
-  };
+ const markAsUsed = async (foodItemId, currentQuantity) => {
+  console.log("[DEBUG] markAsUsed called with:", { foodItemId, currentQuantity });
+  
+  const quantityUsed = prompt(`How many items were used? (Available: ${currentQuantity})`, currentQuantity);
+  console.log("[DEBUG] User entered quantityUsed:", quantityUsed);
 
-  // --- NEW: Mark as Wasted ---
-  const markAsWasted = async (foodItemId, currentQuantity) => {
-    const quantityWasted = prompt(`How many items were wasted? (Available: ${currentQuantity})`, currentQuantity);
-    if (!quantityWasted || isNaN(quantityWasted) || quantityWasted <= 0 || quantityWasted > currentQuantity) {
-      alert('Invalid quantity'); return;
-    }
-    try {
-      await axios.post(`${API_BACKEND}/api/foodmanagement/mark-wasted/${foodItemId}`, {
-        quantityWasted: parseInt(quantityWasted),
-        email: currentUser.email
-      });
-      fetchFoodItems();
-    } catch (err) {
-      console.error(err);
-      alert('Failed to mark as wasted');
-    }
-  };
+  if (!quantityUsed || isNaN(quantityUsed) || quantityUsed <= 0 || quantityUsed > currentQuantity) {
+    alert('Invalid quantity'); 
+    console.log("[DEBUG] Invalid quantity used, aborting");
+    return;
+  }
+
+  try {
+    console.log("[DEBUG] Sending POST to backend for mark-used");
+    const res = await axios.post(`${API_BACKEND}/api/foodmanagement/mark-used/${foodItemId}`, {
+      quantityUsed: parseInt(quantityUsed),
+      email: currentUser.email
+    });
+    console.log("[DEBUG] markAsUsed response:", res.data);
+    fetchFoodItems();
+  } catch (err) {
+    console.error("[DEBUG] markAsUsed error:", err);
+    alert('Failed to mark as used');
+  }
+};
+
+const markAsWasted = async (foodItemId, currentQuantity) => {
+  console.log("[DEBUG] markAsWasted called with:", { foodItemId, currentQuantity });
+  
+  const quantityWasted = prompt(`How many items were wasted? (Available: ${currentQuantity})`, currentQuantity);
+  console.log("[DEBUG] User entered quantityWasted:", quantityWasted);
+
+  if (!quantityWasted || isNaN(quantityWasted) || quantityWasted <= 0 || quantityWasted > currentQuantity) {
+    alert('Invalid quantity'); 
+    console.log("[DEBUG] Invalid quantity wasted, aborting");
+    return;
+  }
+
+  try {
+    console.log("[DEBUG] Sending POST to backend for mark-wasted");
+    const res = await axios.post(`${API_BACKEND}/api/foodmanagement/mark-wasted/${foodItemId}`, {
+      quantityWasted: parseInt(quantityWasted),
+      email: currentUser.email
+    });
+    console.log("[DEBUG] markAsWasted response:", res.data);
+    fetchFoodItems();
+  } catch (err) {
+    console.error("[DEBUG] markAsWasted error:", err);
+    alert('Failed to mark as wasted');
+  }
+};
 
   return (
     <div className={`main-content ${navbarExpanded ? "expanded" : ""}`}>
