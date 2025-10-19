@@ -1,413 +1,261 @@
 /* =========================
    CSS Variables for New Theme
    ========================= */
-   :root {
-    --primary-yellow: #FFD700;
-    --primary-orange: #FF8C00;
-    --accent-yellow: #FFF9C4;
-    --accent-gradient: linear-gradient(135deg, #FFD700, #FF8C00);
-    --sidebar-bg: #FFFFFF;
-    --card-bg: #FFFFFF;
-    --background: #F8FAFC;
-    --text-dark: #1F2937;
-    --text-light: #6B7280;
-    --border-radius: 12px;
-    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    --sidebar-width-collapsed: 70px;
-    --sidebar-width-expanded: 250px;
-  }
-  
   /* =========================
-     Global Styles
-     ========================= */
-  body {
-    background-color: var(--background);
-    margin: 0;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    height: auto;
-    overflow-y: auto;
-    color: var(--text-dark);
-  }
-  
-  /* =========================
-     New Modern Sidebar
-     ========================= */
+   Food Donation App Theme
+   ========================= */
+:root {
+  --primary-yellow: #FFD54F;
+  --primary-orange: #FF8C42;
+  --primary-green: #6DBE45;
+  --accent-light: #FFF9E6;
+  --accent-gradient: linear-gradient(135deg, #FFD54F, #FF8C42);
+  --sidebar-bg: #FFFFFF;
+  --card-bg: #FFFFFF;
+  --background: #F9FBF9;
+  --text-dark: #2E2E2E;
+  --text-light: #707070;
+  --border-radius: 14px;
+  --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --sidebar-width-collapsed: 70px;
+  --sidebar-width-expanded: 250px;
+}
+
+/* =========================
+   Dark Mode Variables
+   ========================= */
+body.dark-mode {
+  --sidebar-bg: #1C1C1C;
+  --card-bg: #2A2A2A;
+  --background: #121212;
+  --text-dark: #F5F5F5;
+  --text-light: #CFCFCF;
+  --shadow: 0 4px 12px rgba(255, 255, 255, 0.05);
+  --accent-gradient: linear-gradient(135deg, #FFB347, #FF8C42);
+}
+
+/* =========================
+   Global Styles
+   ========================= */
+body {
+  background-color: var(--background);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: var(--text-dark);
+  margin: 0;
+  height: auto;
+  overflow-y: auto;
+  transition: background 0.4s ease, color 0.4s ease;
+}
+
+/* =========================
+   Sidebar
+   ========================= */
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: var(--sidebar-width-collapsed);
+  background: var(--sidebar-bg);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: var(--shadow);
+  transition: width 0.3s ease, background 0.4s ease;
+  overflow: hidden;
+  border-right: 1px solid #E5E7EB;
+  z-index: 1000;
+}
+
+.navbar.expanded {
+  width: var(--sidebar-width-expanded);
+}
+
+.main-content {
+  margin-left: var(--sidebar-width-collapsed);
+  padding: 1.5rem;
+  transition: margin-left 0.3s ease;
+  min-height: 100vh;
+}
+
+.navbar.expanded ~ .main-content {
+  margin-left: var(--sidebar-width-expanded);
+}
+
+/* =========================
+   Branding Area (with Fruits!)
+   ========================= */
+.branding {
+  text-align: center;
+  padding: 1.2rem 0.5rem;
+}
+
+.branding img {
+  width: 45px;
+  height: 45px;
+  object-fit: contain;
+}
+
+.branding h1 {
+  font-size: 1.2rem;
+  color: var(--primary-green);
+  margin-top: 0.5rem;
+  white-space: nowrap;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+.navbar.collapsed .branding h1 {
+  opacity: 0;
+}
+
+/* =========================
+   Hamburger
+   ========================= */
+.desktop-hamburger {
+  cursor: pointer;
+  font-size: 1.5rem;
+  padding: 1rem 0;
+  text-align: center;
+  color: var(--primary-orange);
+  transition: transform 0.3s ease;
+}
+
+.desktop-hamburger:hover {
+  transform: scale(1.1);
+}
+
+.desktop-hamburger::before {
+  content: "≡";
+  font-weight: bold;
+}
+
+.navbar.expanded .desktop-hamburger::before {
+  content: "×";
+}
+
+/* =========================
+   Nav Links
+   ========================= */
+.nav-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem;
+}
+
+.nav-links a {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  text-decoration: none;
+  color: var(--text-light);
+  padding: 0.75rem 1rem;
+  border-radius: var(--border-radius);
+  transition: all 0.3s ease;
+  font-weight: 500;
+  position: relative;
+  background: transparent;
+}
+
+.nav-links a:hover {
+  background: linear-gradient(135deg, #FFF5E1, #FFEBD3);
+  color: var(--primary-orange);
+  transform: translateX(4px);
+}
+
+.nav-links a.active {
+  background: linear-gradient(135deg, #FFF0C2, #FFE4B2);
+  color: var(--primary-orange);
+  font-weight: 600;
+}
+
+.nav-links a span:first-child {
+  font-size: 1.3rem;
+  min-width: 24px;
+  text-align: center;
+}
+
+.nav-links a .label {
+  white-space: nowrap;
+  overflow: hidden;
+  opacity: 1;
+  transition: all 0.3s ease;
+}
+
+.navbar.collapsed .nav-links a .label {
+  opacity: 0;
+  width: 0;
+}
+
+/* =========================
+   Logout Button
+   ========================= */
+.sidebar-footer {
+  padding: 1rem;
+  border-top: 1px solid #E5E7EB;
+}
+
+.logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: var(--accent-gradient);
+  color: white;
+  font-weight: 500;
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  justify-content: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.logout-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(255, 140, 0, 0.4);
+}
+
+/* =========================
+   Dark Mode Button
+   ========================= */
+.dark-mode-toggle {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: var(--accent-gradient);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  font-size: 1.3rem;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  transition: transform 0.3s ease;
+  z-index: 1200;
+}
+
+.dark-mode-toggle:hover {
+  transform: scale(1.1);
+}
+
+/* =========================
+   Responsive Design
+   ========================= */
+@media (max-width: 768px) {
   .navbar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100vh;
-    background: var(--sidebar-bg);
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    overflow: hidden;
-    width: var(--sidebar-width-collapsed);
-    z-index: 1000;
-    box-shadow: var(--shadow);
-    border-right: 1px solid #E5E7EB;
+    width: 0;
+    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.95);
   }
-  
-  /* Expanded sidebar */
+
   .navbar.expanded {
-    width: var(--sidebar-width-expanded);
+    width: 260px;
   }
-  
-  /* Main content area */
+
   .main-content {
-    flex: 1;
-    transition: margin-left 0.3s ease;
-    margin-left: var(--sidebar-width-collapsed);
-    padding: 1rem;
-    background: var(--background);
-    min-height: 100vh;
+    margin-left: 0;
+    padding-top: 4rem;
   }
-  
-  /* When navbar expanded, push content */
-  .navbar.expanded ~ .main-content {
-    margin-left: var(--sidebar-width-expanded);
-  }
-  
-  /* =========================
-     Hamburger Menu - DESKTOP (inside sidebar)
-     ========================= */
-  .desktop-hamburger {
-    cursor: pointer;
-    font-size: 1.5rem;
-    padding: 1.5rem 0;
-    text-align: center;
-    background: var(--accent-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    transition: all 0.3s ease;
-    position: relative;
-    z-index: 1001;
-  }
-  
-  .desktop-hamburger:hover {
-    transform: scale(1.1);
-  }
-  
-  /* Hamburger icon using CSS */
-  .desktop-hamburger::before {
-    content: "≡";
-    font-size: 1.8rem;
-    font-weight: bold;
-  }
-  
-  .navbar.expanded .desktop-hamburger::before {
-    content: "×";
-  }
-  
-  /* =========================
-     Mobile Hamburger (fixed position)
-     ========================= */
-  .mobile-hamburger {
-    position: fixed;
-    top: 1rem;
-    left: 1rem;
-    z-index: 1100;
-    font-size: 1.8rem;
-    background: var(--accent-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    padding: 0.8rem;
-    border-radius: 50%;
-    background-color: rgba(255, 255, 255, 0.95);
-    box-shadow: var(--shadow);
-    width: 50px;
-    height: 50px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-  }
-  
-  .mobile-hamburger:hover {
-    transform: scale(1.1);
-  }
-  
-  .mobile-hamburger::before {
-    content: "≡";
-    font-size: 2rem;
-    font-weight: bold;
-  }
-  
-  /* When navbar is expanded on mobile, change to X */
-  .navbar.expanded ~ .mobile-hamburger::before {
-    content: "×";
-  }
-  
-  /* =========================
-     Navigation Links
-     ========================= */
-  .nav-links {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    padding: 1rem 0.5rem;
-    flex: 1;
-  }
-  
-  /* Individual link styling */
-  .nav-links a {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    text-decoration: none;
-    color: var(--text-light);
-    padding: 0.75rem 1rem;
-    transition: all 0.3s ease;
-    border-radius: var(--border-radius);
-    font-weight: 500;
-    position: relative;
-    overflow: hidden;
-  }
-  
-  .nav-links a::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    height: 100%;
-    width: 3px;
-    background: var(--accent-gradient);
-    transform: scaleY(0);
-    transition: transform 0.3s ease;
-  }
-  
-  .nav-links a:hover {
-    background: linear-gradient(135deg, #FFD70010, #FF8C0010);
-    color: var(--primary-orange);
-    transform: translateX(5px);
-  }
-  
-  .nav-links a:hover::before {
-    transform: scaleY(1);
-  }
-  
-  /* Active link state */
-  .nav-links a.active {
-    background: linear-gradient(135deg, #FFD70015, #FF8C0015);
-    color: var(--primary-orange);
-    font-weight: 600;
-  }
-  
-  .nav-links a.active::before {
-    transform: scaleY(1);
-  }
-  
-  /* Emoji/icons */
-  .nav-links a span:first-child {
-    font-size: 1.3rem;
-    min-width: 24px;
-    text-align: center;
-  }
-  
-  /* Labels */
-  .nav-links a .label {
-    white-space: nowrap;
-    overflow: hidden;
-    opacity: 1;
-    transition: all 0.3s ease;
-    font-size: 0.95rem;
-    font-weight: 500;
-  }
-  
-  /* Hide labels when collapsed */
-  .navbar.collapsed .nav-links a .label {
-    opacity: 0;
-    width: 0;
-    transform: translateX(-10px);
-  }
-  
-  /* =========================
-     Notification Badges
-     ========================= */
-  .notification-link {
-    position: relative;
-  }
-  
-  .notification-badge {
-    position: absolute;
-    top: 8px;
-    left: 25px;
-    background: var(--accent-gradient);
-    color: white;
-    font-size: 0.7rem;
-    font-weight: 600;
-    border-radius: 50%;
-    width: 18px;
-    height: 18px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 10;
-    border: 2px solid var(--sidebar-bg);
-  }
-  
-  .navbar.collapsed .notification-badge {
-    left: 30px;
-  }
-  
-  /* =========================
-     Sidebar Footer & Logout
-     ========================= */
-  .sidebar-footer {
-    padding: 1rem;
-    border-top: 1px solid #E5E7EB;
-  }
-  
-  .logout-btn {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.75rem 1rem;
-    font-size: 1rem;
-    font-weight: 500;
-    background: var(--accent-gradient);
-    color: white;
-    border: none;
-    border-radius: var(--border-radius);
-    cursor: pointer;
-    width: 100%;
-    justify-content: center;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 4px rgba(255, 140, 0, 0.2);
-  }
-  
-  .logout-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(255, 140, 0, 0.3);
-  }
-  
-  /* Hide logout label when collapsed */
-  .navbar.collapsed .logout-btn span.label {
-    opacity: 0;
-    width: 0;
-    transform: scale(0);
-  }
-  
-  /* =========================
-     Mobile Responsive Design
-     ========================= */
-  @media (max-width: 768px) {
-    .navbar {
-      width: 0;
-      overflow: hidden;
-      background: rgba(255, 255, 255, 0.98);
-      backdrop-filter: blur(10px);
-    }
-  
-    .navbar.expanded {
-      width: 280px;
-    }
-  
-    /* Hide desktop hamburger on mobile */
-    .desktop-hamburger {
-      display: none !important;
-    }
-  
-    /* Show mobile hamburger */
-    .mobile-hamburger {
-      display: flex !important;
-    }
-  
-    /* Ensure nav links and footer are visible when sidebar is expanded */
-    .navbar.expanded .nav-links,
-    .navbar.expanded .sidebar-footer {
-      display: flex;
-    }
-  
-    .main-content {
-      margin-left: 0;
-      padding: 1rem;
-      padding-top: 4rem; /* Add space for the fixed hamburger */
-    }
-  
-    .navbar.expanded ~ .main-content {
-      margin-left: 0;
-    }
-  
-    /* Adjust notification badges for mobile */
-    .notification-badge {
-      left: 30px;
-      top: 10px;
-    }
-  
-    /* Ensure sidebar content is properly positioned */
-    .navbar.expanded .nav-links {
-      margin-top: 3rem;
-      padding: 1rem;
-    }
-  
-    .navbar.expanded .sidebar-footer {
-      padding: 1rem;
-    }
-  }
-  
-  /* =========================
-     Desktop Styles
-     ========================= */
-  @media (min-width: 769px) {
-    /* Hide mobile hamburger on desktop */
-    .mobile-hamburger {
-      display: none !important;
-    }
-    
-    /* Show desktop hamburger */
-    .desktop-hamburger {
-      display: block;
-    }
-  }
-  
-  /* =========================
-     Smooth Transitions for All Interactive Elements
-     ========================= */
-  .navbar * {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  
-  /* =========================
-     Scrollbar Styling (Optional)
-     ========================= */
-  .navbar::-webkit-scrollbar {
-    width: 4px;
-  }
-  
-  .navbar::-webkit-scrollbar-track {
-    background: #f1f1f1;
-  }
-  
-  .navbar::-webkit-scrollbar-thumb {
-    background: var(--primary-orange);
-    border-radius: 10px;
-  }
-  
-  .navbar::-webkit-scrollbar-thumb:hover {
-    background: var(--primary-yellow);
-  }
-  
-  /* =========================
-     Additional Yellow/Orange Accents
-     ========================= */
-  /* Add subtle yellow background to active notifications */
-  .notification-link.active {
-    background: var(--accent-yellow);
-  }
-  
-  /* Yellow highlight for important items */
-  .highlight-yellow {
-    background: linear-gradient(135deg, #FFD70020, #FF8C0020);
-    border-left: 3px solid var(--primary-yellow);
-  }
-  
-  /* Orange accent for urgent items */
-  .highlight-orange {
-    background: linear-gradient(135deg, #FF8C0020, #FF450020);
-    border-left: 3px solid var(--primary-orange);
-  }
+}
