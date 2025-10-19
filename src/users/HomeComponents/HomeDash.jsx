@@ -104,31 +104,58 @@ export default function HomeDash({ currentUser, onAddNew, navbarExpanded }) {
   }
 };
 
-const markAsWasted = async (foodItemId, currentQuantity) => {
-  console.log("[DEBUG] markAsWasted called with:", { foodItemId, currentQuantity });
-  
-  const quantityWasted = prompt(`How many items were wasted? (Available: ${currentQuantity})`, currentQuantity);
-  console.log("[DEBUG] User entered quantityWasted:", quantityWasted);
-
-  if (!quantityWasted || isNaN(quantityWasted) || quantityWasted <= 0 || quantityWasted > currentQuantity) {
-    alert('Invalid quantity'); 
-    console.log("[DEBUG] Invalid quantity wasted, aborting");
+// --- Mark as Used ---
+const markAsUsed = async (foodItemId, currentQuantity) => {
+  const quantityUsed = prompt(
+    `How many items were used? (Available: ${currentQuantity})`,
+    currentQuantity
+  );
+  if (!quantityUsed || isNaN(quantityUsed) || quantityUsed <= 0 || quantityUsed > currentQuantity) {
+    alert('Invalid quantity');
     return;
   }
-
   try {
-    console.log("[DEBUG] Sending POST to backend for mark-wasted");
-    const res = await axios.post(`${API_BACKEND}/api/foodmanagement/mark-wasted/${foodItemId}`, {
+    console.log("[DEBUG] markAsUsed called with:", { foodItemId, currentQuantity });
+    console.log("[DEBUG] User entered quantityUsed:", quantityUsed);
+
+    await axios.post(`${API_BACKEND}/api/foodmanagement/mark-used/${foodItemId}`, {
+      quantityUsed: parseInt(quantityUsed),
+      email: currentUser.email
+    });
+
+    fetchFoodItems();
+  } catch (err) {
+    console.error("[DEBUG] markAsUsed error:", err);
+    alert('Failed to mark as used');
+  }
+};
+
+// --- Mark as Wasted ---
+const markAsWasted = async (foodItemId, currentQuantity) => {
+  const quantityWasted = prompt(
+    `How many items were wasted? (Available: ${currentQuantity})`,
+    currentQuantity
+  );
+  if (!quantityWasted || isNaN(quantityWasted) || quantityWasted <= 0 || quantityWasted > currentQuantity) {
+    alert('Invalid quantity');
+    return;
+  }
+  try {
+    console.log("[DEBUG] markAsWasted called with:", { foodItemId, currentQuantity });
+    console.log("[DEBUG] User entered quantityWasted:", quantityWasted);
+
+    await axios.post(`${API_BACKEND}/api/foodmanagement/mark-wasted/${foodItemId}`, {
       quantityWasted: parseInt(quantityWasted),
       email: currentUser.email
     });
-    console.log("[DEBUG] markAsWasted response:", res.data);
+
     fetchFoodItems();
   } catch (err) {
     console.error("[DEBUG] markAsWasted error:", err);
     alert('Failed to mark as wasted');
   }
 };
+
 
   return (
     <div className={`main-content ${navbarExpanded ? "expanded" : ""}`}>
