@@ -250,9 +250,9 @@ renderSidebar() {
                       🗂️ <span className="label">Bulk Upload</span>
                     </Link>
                     {/* Remove later ↓ */}
-                    <Link to="/foodmanagement" onClick={() => isMobile && this.toggleSidebar()}>
+                    {/* <Link to="/foodmanagement" onClick={() => isMobile && this.toggleSidebar()}>
                       🍎 <span className="label">Food Management</span>
-                    </Link>
+                    </Link> */}
                     <Link to="/communication" className="notification-link" onClick={() => isMobile && this.toggleSidebar()}>
                       🗨️ <span className="label">Communication</span>
                       {unreadMessagesCount > 0 && (
@@ -277,9 +277,9 @@ renderSidebar() {
                         <span className="notification-badge">{unreadCount}</span>
                       )}
                     </Link>
-                    <Link to="/expiry" onClick={() => isMobile && this.toggleSidebar()}>
+                    {/* <Link to="/expiry" onClick={() => isMobile && this.toggleSidebar()}>
                       ⏱️ <span className="label">Expiry Manager</span>
-                    </Link>
+                    </Link> */}
                   </div>
 
                   {/* Logout */}
