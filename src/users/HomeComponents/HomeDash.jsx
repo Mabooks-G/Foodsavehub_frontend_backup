@@ -14,21 +14,25 @@ export default function HomeDash({ currentUser, onAddNew, navbarExpanded }) {
   const [deleteConfirmId, setDeleteConfirmId] = useState(null);
   const [wasteStats, setWasteStats] = useState({ totalUsed: 0, totalWasted: 0, totalEntries: 0 });
 
+  // Fetch food items
   const fetchFoodItems = async () => {
+    if (!currentUser?.email) return;
+
     try {
-      const res = await axios.get(`${API_BACKEND}/api/users/fooditems?email=${currentUser.email}`);
+      const res = await axios.get(`${API_BACKEND}/api/users/fooditems?email=${encodeURIComponent(currentUser.email)}`);
       const items = res.data.foodItems;
 
-      const wasteRes = await axios.get(`${API_BACKEND}/api/users/waste-stats?email=${currentUser.email}`);
+      const wasteRes = await axios.get(`${API_BACKEND}/api/users/waste-stats?email=${encodeURIComponent(currentUser.email)}`);
+
       setAllFoodItems(items);
       setFoodItems(filterCategory ? items.filter(f => f.foodcategory === filterCategory) : items);
-      setWasteStats(wasteRes.data);
+      setWasteStats(wasteRes.data || { totalUsed: 0, totalWasted: 0, totalEntries: 0 });
     } catch (err) {
-      console.error("Error fetching food items:", err);
+      console.error("Error fetching food items:", err.response?.data || err);
     }
   };
 
-  useEffect(() => { fetchFoodItems(); }, []);
+  useEffect(() => { fetchFoodItems(); }, [currentUser]);
 
   const handleFilterChange = (e) => {
     const category = e.target.value;
@@ -68,7 +72,7 @@ export default function HomeDash({ currentUser, onAddNew, navbarExpanded }) {
   const handleDeleteRequest = (id) => setDeleteConfirmId(id);
   const handleConfirmDelete = async (id) => {
     try {
-      await axios.delete(`${API_BACKEND}/api/users/fooditems/${id}?email=${currentUser.email}`);
+      await axios.delete(`${API_BACKEND}/api/users/fooditems/${id}?email=${encodeURIComponent(currentUser.email)}`);
       setDeleteConfirmId(null);
       fetchFoodItems();
     } catch(err) { console.error(err); }
@@ -82,7 +86,8 @@ export default function HomeDash({ currentUser, onAddNew, navbarExpanded }) {
     }
     try {
       await axios.post(`${API_BACKEND}/api/foodmanagement/mark-used/${foodItemId}`, {
-        quantityUsed: parseInt(quantityUsed), email: currentUser.email
+        quantityUsed: parseInt(quantityUsed),
+        email: currentUser.email
       });
       fetchFoodItems();
     } catch (err) { console.error(err); alert('Failed to mark as used'); }
@@ -95,7 +100,8 @@ export default function HomeDash({ currentUser, onAddNew, navbarExpanded }) {
     }
     try {
       await axios.post(`${API_BACKEND}/api/foodmanagement/mark-wasted/${foodItemId}`, {
-        quantityWasted: parseInt(quantityWasted), email: currentUser.email
+        quantityWasted: parseInt(quantityWasted),
+        email: currentUser.email
       });
       fetchFoodItems();
     } catch (err) { console.error(err); alert('Failed to mark as wasted'); }
@@ -126,7 +132,6 @@ export default function HomeDash({ currentUser, onAddNew, navbarExpanded }) {
         {foodItems.sort((a,b) => new Date(a.expirydate) - new Date(b.expirydate))
           .map(item => (
             <div key={item.fooditemid} className={`food-card ${getExpiryClass(item.expirydate)}`} style={{ height: editingId===item.fooditemid?'auto':'220px' }}>
-              {/* Category */}
               <div className="card-row">
                 <label>Category:</label>
                 {editingId===item.fooditemid ? (
@@ -135,31 +140,20 @@ export default function HomeDash({ currentUser, onAddNew, navbarExpanded }) {
                   </select>
                 ) : item.foodcategory}
               </div>
-
-              {/* Name */}
               <div className="card-row">
                 <label>Name:</label>
                 {editingId===item.fooditemid ? <input name="name" value={editedItem.name} onChange={handleInputChange} /> : item.name}
               </div>
-
-              {/* Expiry */}
               <div className="card-row">
                 <label>Expiry:</label>
                 {editingId===item.fooditemid ? <input type="date" name="expirydate" value={editedItem.expirydate?.slice(0,10)} onChange={handleInputChange} /> : new Date(item.expirydate).toLocaleDateString()}
               </div>
-
-              {/* Quantity */}
               <div className="card-row">
                 <label>Quantity:</label>
                 {editingId===item.fooditemid ? (
                   <input type="number" name="quantity" value={editedItem.quantity} onChange={handleInputChange} />
-                ) : (
-                  <>
-                    {item.quantity} 
-                  </>
-                )}
+                ) : item.quantity}
               </div>
-
               <div className="card-row">
                 {editingId===item.fooditemid ? (
                   <>
