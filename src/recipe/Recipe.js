@@ -8,6 +8,9 @@ class Recipe extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      //this is so that an error message pops up when you try to generate a recipe without selecting ingreients
+      showErrorModal: false,
+      errorMessage: "",
       selectedItems: [],
       items: [],
       inventory: [],        // rest of the food items
@@ -90,6 +93,11 @@ closeDetailModal = () => {
 hideDeleteModal = () => {
   this.setState({ showConfirmModal: false, recipeToDelete: null });
 };
+
+openDetailModal = (recipe) => {
+  this.setState({ selectedRecipe: recipe, showDetailModal: true });
+};
+
 
 fetchInventory = async () => {
   try {
@@ -185,10 +193,16 @@ fetchInventory = async () => {
   // - If no items are selected, alerts the user and exits early
   // - Otherwise, continues with recipe generation logic (API call, etc.)
   handleGenerate = async () => {
-  const { selectedItems, filters } = this.state;
+  const { selectedItems, showSavedPanel , filters} = this.state;
+
+  // Don't show error if on saved recipes page
+  if (showSavedPanel) return;
 
   if (selectedItems.length === 0) {
-    alert("Please select at least one ingredient to generate a recipe.");
+    this.setState({
+      showErrorModal: true,
+      errorMessage: "Please select at least one ingredient to generate a recipe."
+    });
     return;
   }
 
@@ -480,6 +494,9 @@ ifShowSavedPanel = () => {
         </div>
       )}
 
+
+
+
       {/* Recipe Detail Modal */}
       {showDetailModal && selectedRecipe && (
         <div className="modal-overlay" onClick={this.closeDetailModal}>
@@ -582,6 +599,33 @@ if (this.state.deleting) {
   // Modals
   const modal = (
     <>
+    {!showSavedPanel && !showGeneratedPanel && this.state.showErrorModal && (
+  <div className="modal-overlay" onClick={() => this.setState({ showErrorModal: false })}>
+    <div className="modal" onClick={(e) => e.stopPropagation()}>
+      <h3>Error</h3>
+      <p>{this.state.errorMessage}</p>
+      <div style={{ textAlign: "center", marginTop: "20px" }}>
+        <button
+          className="modal-btn"
+          style={{
+            backgroundColor: "red",
+            color: "white",
+            padding: "10px 20px",
+            border: "none",
+            borderRadius: "5px",
+            cursor: "pointer",
+            fontWeight: "bold"
+          }}
+          onClick={() => this.setState({ showErrorModal: false })}
+        >
+          OK
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+
       {/* Delete Confirmation Modal */}
       {showConfirmModal && recipeToDelete && (
         <div className="modal-overlay">
@@ -761,7 +805,7 @@ if (this.state.deleting) {
   // AI Recipe Generator Panel
   const aiPanel = !showGeneratedPanel && !showSavedPanel && (
     <div className="notification-wrapper" style={{ display: "flex", gap: "20px" }}>
-      <div className="recipe-container">
+      <div className="recipe-background">
         <div className="recipe-card">
           <h1 >AI Recipe Generator</h1>
           <h2 className="recipe-title">Expiring Inventory Items</h2>
