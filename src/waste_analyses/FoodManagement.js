@@ -33,14 +33,23 @@ const FoodManagement = ({ currentUser }) => {
       const email = currentUser?.email;
       if (!email) return;
 
-      const response = await fetch(`${API_BACKEND}/api/foodmanagement/user-profile?email=${email}`);
-      
-      if (response.ok) {
-        const data = await response.json();
-        setUserRegion(data.region || '');
+      // Use the existing user data instead of making a new API call
+      if (currentUser.region) {
+        setUserRegion(currentUser.region);
+      } else {
+        // Fallback: try to get region from user profile
+        const response = await fetch(`${API_BACKEND}/api/profile?email=${email}`);
+        if (response.ok) {
+          const data = await response.json();
+          setUserRegion(data.region || '');
+        }
       }
     } catch (err) {
       console.error('Error fetching user region:', err);
+      // Use region from currentUser if available
+      if (currentUser?.region) {
+        setUserRegion(currentUser.region);
+      }
     }
   };
 
@@ -116,7 +125,7 @@ const FoodManagement = ({ currentUser }) => {
 
       if (response.ok) {
         const result = await response.json();
-        alert(`${result.message}\nLocation: ${result.autoDetectedCity}`);
+        alert(`${result.message}`);
         fetchFoodItems();
         fetchWasteStats();
       } else {
@@ -161,7 +170,7 @@ const FoodManagement = ({ currentUser }) => {
 
       if (response.ok) {
         const result = await response.json();
-        alert(`${result.message}\nLocation: ${result.autoDetectedCity}`);
+        alert(`${result.message}`);
         fetchFoodItems();
         fetchWasteStats();
       } else {
