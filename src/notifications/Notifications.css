@@ -174,15 +174,16 @@
    ========================= */
 @media (max-width: 768px) {
   .notification-container {
-    padding: 10px;
-    margin-top: 20px;
+    padding: 0;
+    margin-top: 10px;
   }
 
   .notification-card {
-    width: 100%;
-    max-width: 100%;
-    padding: 20px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    width: 80vw;       /* take full viewport width */
+    max-width: none;    /* remove width restriction completely */
+    border-radius: 0;   /* optional: make it edge-to-edge */
+    padding: 20px 14px;
+    box-shadow: none;   /* optional: remove shadow for flat mobile feel */
   }
 
   .notification-title {
@@ -195,6 +196,7 @@
     align-items: flex-start;
     padding: 14px;
     gap: 8px;
+    width: 100%;
   }
 
   .notification-actions {
@@ -214,12 +216,13 @@
 
 /* Even smaller screens (phones) */
 @media (max-width: 480px) {
-  .notification-title {
-    font-size: 20px;
+  .notification-card {
+    width: 100vw;       /* make it fully wide */
+    padding: 16px 10px;
   }
 
-  .notification-card {
-    padding: 16px;
+  .notification-title {
+    font-size: 20px;
   }
 
   .notification-item {
