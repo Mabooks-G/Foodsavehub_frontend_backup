@@ -21,7 +21,7 @@ import FoodManagement from './waste_analyses/FoodManagement';
 import Notifications from './notifications/Notification';
 import ExpiryManager from './expiry_manager/ExpiryManager';
 import BulkUpload from './database/BulkUpload';
-
+import DarkModeButton from "./DarkModeButton";
 // Chat Components and Provider
 import { ChatProvider, default as ChatContext } from './communication/Components/ChatContext';
 import ChatList from './communication/Components/ChatList';
@@ -219,13 +219,14 @@ renderSidebar() {
 
         return (
           <>
+           <DarkModeButton />
             {/* Mobile Hamburger - ONLY visible on mobile */}
             {isMobile && (
               <div className="mobile-hamburger" onClick={this.toggleSidebar}>
                 {sidebarCollapsed ? "≡" : "×"}
               </div>
             )}
-
+            
             {/* Navbar with Desktop Hamburger inside */}
             <nav className={`navbar ${sidebarClass}`}>
               {/* Desktop Hamburger - ONLY visible on desktop */}
