@@ -1,12 +1,13 @@
 /* Author: Bethlehem Shimelis
    Event: Sprint 1: Dashboard View for Food Inventory
-   LatestUpdate: Added inline editing, deletion confirmation, and category filtering
+   LatestUpdate: Added mark-used/mark-wasted buttons with backend city lookup
    parameters: currentUser, onAddNew
    Description: Displays the user's food items in a table with expiry status,
                 allows inline edits, deleting items with confirmation, 
-                filtering by category, and sorting by expiry date
+                filtering by category, sorting by expiry date, and marking used/wasted
    Returns: Updates dashboard when edits/deletions are made, triggers add-new form
 */
+
 import { useEffect, useState } from "react";
 import axios from "axios";
 import "../HomeUser.css";
@@ -76,6 +77,42 @@ export default function HomeDash({ currentUser, onAddNew, navbarExpanded }) {
     } catch(err) { console.error(err); }
   };
   const handleCancelDelete = () => setDeleteConfirmId(null);
+
+  // --- NEW: Mark as Used ---
+  const markAsUsed = async (foodItemId, currentQuantity) => {
+    const quantityUsed = prompt(`How many items were used? (Available: ${currentQuantity})`, currentQuantity);
+    if (!quantityUsed || isNaN(quantityUsed) || quantityUsed <= 0 || quantityUsed > currentQuantity) {
+      alert('Invalid quantity'); return;
+    }
+    try {
+      await axios.post(`${API_BACKEND}/api/foodmanagement/mark-used/${foodItemId}`, {
+        quantityUsed: parseInt(quantityUsed),
+        email: currentUser.email
+      });
+      fetchFoodItems();
+    } catch (err) {
+      console.error(err);
+      alert('Failed to mark as used');
+    }
+  };
+
+  // --- NEW: Mark as Wasted ---
+  const markAsWasted = async (foodItemId, currentQuantity) => {
+    const quantityWasted = prompt(`How many items were wasted? (Available: ${currentQuantity})`, currentQuantity);
+    if (!quantityWasted || isNaN(quantityWasted) || quantityWasted <= 0 || quantityWasted > currentQuantity) {
+      alert('Invalid quantity'); return;
+    }
+    try {
+      await axios.post(`${API_BACKEND}/api/foodmanagement/mark-wasted/${foodItemId}`, {
+        quantityWasted: parseInt(quantityWasted),
+        email: currentUser.email
+      });
+      fetchFoodItems();
+    } catch (err) {
+      console.error(err);
+      alert('Failed to mark as wasted');
+    }
+  };
 
   return (
     <div className={`main-content ${navbarExpanded ? "expanded" : ""}`}>
@@ -151,6 +188,8 @@ export default function HomeDash({ currentUser, onAddNew, navbarExpanded }) {
                 <>
                   <button className="btn btn-orange" onClick={()=>handleEditClick(item)}>Edit</button>
                   <button className="btn btn-red" onClick={()=>handleDeleteRequest(item.fooditemid)}>Delete</button>
+                  <button className="btn btn-used" onClick={()=>markAsUsed(item.fooditemid, item.quantity)}>✅ Used</button>
+                  <button className="btn btn-wasted" onClick={()=>markAsWasted(item.fooditemid, item.quantity)}>🗑️ Wasted</button>
                 </>
               )}
             </div>
@@ -164,4 +203,3 @@ export default function HomeDash({ currentUser, onAddNew, navbarExpanded }) {
     </div>
   );
 }
-
