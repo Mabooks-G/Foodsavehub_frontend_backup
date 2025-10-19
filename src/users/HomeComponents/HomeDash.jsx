@@ -101,31 +101,40 @@ export default function HomeDash({ currentUser, onAddNew, navbarExpanded }) {
   const handleCancelDelete = () => setDeleteConfirmId(null);
 
   // Mark as Used / Wasted
-  const markAsUsed = async (foodItemId, currentQuantity) => {
-    const quantityUsed = prompt(`How many items were used? (Available: ${currentQuantity})`, currentQuantity);
-    if (!quantityUsed || isNaN(quantityUsed) || quantityUsed <= 0 || quantityUsed > currentQuantity) {
-      alert('Invalid quantity'); return;
-    }
-    try {
-      await axios.post(`${API_BACKEND}/api/foodmanagement/mark-used/${foodItemId}`, {
-        quantityUsed: parseInt(quantityUsed), email: currentUser.email
-      });
-      fetchFoodItems();
-    } catch (err) { console.error(err); alert('Failed to mark as used'); }
-  };
+ // Mark as Used / Wasted
+const markAsUsed = async (foodItemId, currentQuantity) => {
+  const quantityUsed = parseInt(prompt(`How many items were used? (Available: ${currentQuantity})`, currentQuantity));
+  if (!quantityUsed || quantityUsed <= 0 || quantityUsed > currentQuantity) {
+    alert('Invalid quantity'); return;
+  }
+  try {
+    await axios.post(`${API_BACKEND}/api/foodmanagement/mark-used/${foodItemId}`, {
+      quantityUsed,
+      email: currentUser.email
+    });
+    fetchFoodItems();
+  } catch (err) {
+    console.error(err);
+    alert('Failed to mark as used');
+  }
+};
 
-  const markAsWasted = async (foodItemId, currentQuantity) => {
-    const quantityWasted = prompt(`How many items were wasted? (Available: ${currentQuantity})`, currentQuantity);
-    if (!quantityWasted || isNaN(quantityWasted) || quantityWasted <= 0 || quantityWasted > currentQuantity) {
-      alert('Invalid quantity'); return;
-    }
-    try {
-      await axios.post(`${API_BACKEND}/api/foodmanagement/mark-wasted/${foodItemId}`, {
-        quantityWasted: parseInt(quantityWasted), email: currentUser.email
-      });
-      fetchFoodItems();
-    } catch (err) { console.error(err); alert('Failed to mark as wasted'); }
-  };
+const markAsWasted = async (foodItemId, currentQuantity) => {
+  const quantityWasted = parseInt(prompt(`How many items were wasted? (Available: ${currentQuantity})`, currentQuantity));
+  if (!quantityWasted || quantityWasted <= 0 || quantityWasted > currentQuantity) {
+    alert('Invalid quantity'); return;
+  }
+  try {
+    await axios.post(`${API_BACKEND}/api/foodmanagement/mark-wasted/${foodItemId}`, {
+      quantityWasted,
+      email: currentUser.email
+    });
+    fetchFoodItems();
+  } catch (err) {
+    console.error(err);
+    alert('Failed to mark as wasted');
+  }
+};
 
   return (
     <div className={`main-content ${navbarExpanded ? "expanded" : ""}`}>
