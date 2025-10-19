@@ -78,31 +78,6 @@ export default function HomeDash({ currentUser, onAddNew, navbarExpanded }) {
   };
   const handleCancelDelete = () => setDeleteConfirmId(null);
 
- const markAsUsed = async (foodItemId, currentQuantity) => {
-  console.log("[DEBUG] markAsUsed called with:", { foodItemId, currentQuantity });
-  
-  const quantityUsed = prompt(`How many items were used? (Available: ${currentQuantity})`, currentQuantity);
-  console.log("[DEBUG] User entered quantityUsed:", quantityUsed);
-
-  if (!quantityUsed || isNaN(quantityUsed) || quantityUsed <= 0 || quantityUsed > currentQuantity) {
-    alert('Invalid quantity'); 
-    console.log("[DEBUG] Invalid quantity used, aborting");
-    return;
-  }
-
-  try {
-    console.log("[DEBUG] Sending POST to backend for mark-used");
-    const res = await axios.post(`${API_BACKEND}/api/foodmanagement/mark-used/${foodItemId}`, {
-      quantityUsed: parseInt(quantityUsed),
-      email: currentUser.email
-    });
-    console.log("[DEBUG] markAsUsed response:", res.data);
-    fetchFoodItems();
-  } catch (err) {
-    console.error("[DEBUG] markAsUsed error:", err);
-    alert('Failed to mark as used');
-  }
-};
 
 // --- Mark as Used ---
 const markAsUsed = async (foodItemId, currentQuantity) => {
