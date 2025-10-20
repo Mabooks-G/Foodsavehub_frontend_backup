@@ -129,6 +129,10 @@ class App extends Component {
       );
       const unread = res.data.filter(n => !n.notificationRead).length;
       this.setState({ unreadCount: unread });
+      // FILTER OUT DELETED NOTIFICATIONS
+    const unread = res.data.filter(n => !n.notificationRead && !n.notificationDeleted).length;
+    this.setState({ unreadCount: unread });
+       
     } catch (err) {
       console.error("Failed to fetch unread notifications:", err);
     }
