@@ -147,7 +147,7 @@ export const ChatProvider = ({ children, currentUserEmail, currentUserId: initia
      LatestUpdate: WebSocket connection
      Description: Sets up socket.io for real-time messages and online status tracking
   */
-  useEffect(() => {
+ useEffect(() => {
     if (!currentUserId) return;
     const backendUrl = process.env.REACT_APP_API_BACKEND || 'https://foodsave-backend-tdwp.onrender.com';
     const newSocket = io(backendUrl, {
@@ -158,7 +158,6 @@ export const ChatProvider = ({ children, currentUserEmail, currentUserId: initia
       reconnectionAttempts: 5,
       reconnectionDelay: 1000
     });
-
     setSocket(newSocket);
 
     newSocket.on('connect', () => {
@@ -178,26 +177,21 @@ export const ChatProvider = ({ children, currentUserEmail, currentUserId: initia
 
     newSocket.on('messageDelivered', ({ chatId, userId }) => {
       setChannels(prev => prev.map(msg =>
-        msg.chatid === chatId && msg.senderid !== userId
-          ? { ...msg, delivered: true }
-          : msg
+        msg.chatid === chatId && msg.senderid !== userId ? { ...msg, delivered: true } : msg
       ));
     });
 
     newSocket.on('messageRead', ({ chatId, senderId }) => {
       setChannels(prev => prev.map(msg =>
-        msg.chatid === chatId && msg.senderid !== senderId
-          ? { ...msg, readreceipts: true }
-          : msg
+        msg.chatid === chatId && msg.senderid !== senderId ? { ...msg, readreceipts: true } : msg
       ));
     });
 
     newSocket.on('onlineUsers', (onlineIds) => setOnlineUsers(new Set(onlineIds)));
 
-    return () => {
-      newSocket.disconnect();
-    };
+    return () => newSocket.disconnect();
   }, [currentUserId]);
+
 
   /* Author: Lethabo Mazui
      LatestUpdate: Polling getUserChats
