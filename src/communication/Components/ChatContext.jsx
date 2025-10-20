@@ -149,13 +149,8 @@ export const ChatProvider = ({ children, currentUserEmail, currentUserId: initia
   */
   useEffect(() => {
     if (!currentUserId) return;
-    
-    // Use the same backend URL as your API calls
     const backendUrl = process.env.REACT_APP_API_BACKEND || 'https://foodsave-backend-tdwp.onrender.com';
-    
-    //console.log('Connecting to WebSocket:', backendUrl);
-    
-    const newSocket = io(backendUrl, { 
+    const newSocket = io(backendUrl, {
       query: { userId: currentUserId },
       transports: ['websocket', 'polling'],
       timeout: 10000,
@@ -163,103 +158,44 @@ export const ChatProvider = ({ children, currentUserEmail, currentUserId: initia
       reconnectionAttempts: 5,
       reconnectionDelay: 1000
     });
-    
+
     setSocket(newSocket);
 
-    // Handle connection events
     newSocket.on('connect', () => {
-      console.log('WebSocket: Connected to server successfully');
       setIsSocketConnected(true);
       newSocket.emit('joinUser', { userId: currentUserId });
     });
 
-    newSocket.on('disconnect', (reason) => {
-      console.log('WebSocket: Disconnected from server:', reason);
-      setIsSocketConnected(false);
-    });
+    newSocket.on('disconnect', () => setIsSocketConnected(false));
+    newSocket.on('connect_error', () => setIsSocketConnected(false));
 
-    newSocket.on('connect_error', (error) => {
-      console.error('WebSocket: Connection error:', error);
-      setIsSocketConnected(false);
-    });
-
-    // Handle new messages from other users
     newSocket.on('newMessage', async (msg) => {
-     // console.log('WebSocket: New message received', msg);
-      
-      // Only process if this message is not from ourselves
       if (msg.senderid !== currentUserId) {
-        try {
-          const decrypted = await decryptMessage(msg);
-          setChannels(prev => {
-            // Check if message already exists to avoid duplicates
-            const exists = prev.some(m => m.chatid === msg.chatid);
-            if (!exists) {
-              console.log('Adding new message to channels:', decrypted);
-              return [...prev, decrypted];
-            }
-            //console.log('Message already exists, skipping:', msg.chatid);
-            return prev;
-          });
-        } catch (error) {
-          console.error('Error processing new message:', error);
-        }
+        const decrypted = await decryptMessage(msg);
+        setChannels(prev => prev.some(m => m.chatid === msg.chatid) ? prev : [...prev, decrypted]);
       }
     });
 
-    // Handle message delivered receipts
-    newSocket.on('messageDelivered', ({ donationid, userId }) => {
-      //console.log('WebSocket: Message delivered for donation', donationid);
-      setChannels(prev => prev.map(msg => 
-        msg.donationid === donationid && msg.senderid !== userId 
-          ? { ...msg, delivered: true } 
+    newSocket.on('messageDelivered', ({ chatId, userId }) => {
+      setChannels(prev => prev.map(msg =>
+        msg.chatid === chatId && msg.senderid !== userId
+          ? { ...msg, delivered: true }
           : msg
       ));
     });
 
-    // Handle message read receipts
-    newSocket.on('messageRead', ({ donationid, senderId }) => {
-      //console.log('WebSocket: Message read for donation', donationid);
-      setChannels(prev => prev.map(msg => 
-        msg.donationid === donationid && msg.senderid !== senderId 
-          ? { ...msg, readreceipts: true } 
+    newSocket.on('messageRead', ({ chatId, senderId }) => {
+      setChannels(prev => prev.map(msg =>
+        msg.chatid === chatId && msg.senderid !== senderId
+          ? { ...msg, readreceipts: true }
           : msg
       ));
     });
 
-    // Handle online users updates
-    newSocket.on('onlineUsers', (onlineIds) => {
-      //console.log('WebSocket: Online users updated', onlineIds);
-      setOnlineUsers(new Set(onlineIds));
-    });
-
-    newSocket.on('userConnected', (userId) => {
-      console.log('WebSocket: User connected', userId);
-      setOnlineUsers(prev => new Set(prev).add(userId));
-    });
-
-    newSocket.on('userDisconnected', (userId) => {
-      console.log('WebSocket: User disconnected', userId);
-      setOnlineUsers(prev => {
-        const updated = new Set(prev);
-        updated.delete(userId);
-        return updated;
-      });
-    });
+    newSocket.on('onlineUsers', (onlineIds) => setOnlineUsers(new Set(onlineIds)));
 
     return () => {
-      console.log('WebSocket: Cleaning up connection');
       newSocket.disconnect();
-      // Remove all event listeners
-      newSocket.off('connect');
-      newSocket.off('disconnect');
-      newSocket.off('connect_error');
-      newSocket.off('newMessage');
-      newSocket.off('messageDelivered');
-      newSocket.off('messageRead');
-      newSocket.off('onlineUsers');
-      newSocket.off('userConnected');
-      newSocket.off('userDisconnected');
     };
   }, [currentUserId]);
 
