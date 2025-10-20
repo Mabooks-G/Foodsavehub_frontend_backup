@@ -1,20 +1,23 @@
-/* Author: Bethlehem Shimelis
+/* Author: Bethlehem Shimelis 
    Event: Sprint 1: Add Food Item Form (manual input, expiry etc)
    LatestUpdate: added validation, posts to backend, handles success + error msgs
-   parameters: currentUser, onClose, onRefresh
+   parameters: currentUser, onClose, onRefresh, scannedData
    Description: renders a table-style form to add food items
                 keeps track of inputs, validates, posts to backend
    Returns: triggers dashboard refresh, shows messages, resets form
 */
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "../HomeUser.css";
+
 const API_BACKEND = process.env.REACT_APP_API_BACKEND;
 
-export default function HomeForm({ currentUser, onClose, onRefresh }) {
-  
-  // --- state stuff ---
+export default function HomeForm({ currentUser, onClose, onRefresh, scannedData }) {
+  const navigate = useNavigate();
+
+  // --- state ---
   const [form, setForm] = useState({
     name: "",
     expirydate: "",
@@ -23,8 +26,18 @@ export default function HomeForm({ currentUser, onClose, onRefresh }) {
     Measure_per_Unit: 1,
     Unit: "g",
   });
-  const [error, setError] = useState(""); // show error msgs
-  const [success, setSuccess] = useState(""); // show success msgs
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  // --- Autofill from scanned item ---
+  useEffect(() => {
+    if (scannedData) {
+      setForm((prev) => ({
+        ...prev,
+        name: scannedData, // prefill Name field
+      }));
+    }
+  }, [scannedData]);
 
   // dropdown options
   const foodCategories = [
@@ -33,20 +46,20 @@ export default function HomeForm({ currentUser, onClose, onRefresh }) {
   ];
   const units = ["ml", "L", "g", "kg"];
 
-  // handle any input / select change 
+  // handle input / select change
   const handleChange = (e) => {
     let value = e.target.value;
-    if (e.target.type === "number") value = Number(value); // convert numbers
-    setForm({ ...form, [e.target.name]: value }); // update the right field
+    if (e.target.type === "number") value = Number(value);
+    setForm({ ...form, [e.target.name]: value });
   };
 
-  // submit function
+  // --- submit function ---
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(""); 
     setSuccess("");
 
-    // --- quick validation checks ---
+    // validation
     if (!form.name || form.name.trim() === "") return setError("Name is required");
     const expiry = new Date(form.expirydate);
     const today = new Date(); today.setHours(0,0,0,0);
@@ -56,7 +69,7 @@ export default function HomeForm({ currentUser, onClose, onRefresh }) {
     if (!form.foodcategory) return setError("Please select a category");
 
     try {
-      // --- send to backend ---
+      // send to backend
       const payload = {
         email: currentUser.email,
         name: form.name,
@@ -68,14 +81,26 @@ export default function HomeForm({ currentUser, onClose, onRefresh }) {
       };
       await axios.post(`${API_BACKEND}/api/users/fooditems`, payload);
 
-      // --- on success ---
-      setSuccess("Food item added!"); // nice
-      setForm({ name:"", expirydate:"", quantity:1, foodcategory:"", Measure_per_Unit:1, Unit:"g" }); // reset form
-      if (onRefresh) onRefresh(); // update dashboard
+      // success
+      if (onRefresh) onRefresh(); // refresh dashboard
+
+      // Go back 2 steps and keep name autofilled
+      navigate(-2, { state: { scannedData: form.name } });
+
     } catch (err) {
       console.error(err);
-      setError(err.response?.data?.error || "Failed to add food item"); // show error
+      setError(err.response?.data?.error || "Failed to add food item");
     }
+  };
+
+  /* Author: Nomusa
+     Event: Sprint 2
+     LatestUpdate: 28 Sept 2025
+     Function: handleScanClick
+     Description: Navigates to the QuaggaScanner page when Scan Item button is clicked
+  */
+  const handleScanClick = () => {
+    navigate("/QuaggaScanner"); // navigate to scan page
   };
 
   // --- UI render ---
@@ -85,7 +110,7 @@ export default function HomeForm({ currentUser, onClose, onRefresh }) {
       <form onSubmit={handleSubmit}>
         <table className="form-table">
           <tbody>
-            {/* name input */}
+            {/* Name */}
             <tr>
               <td>Name:</td>
               <td>
@@ -93,7 +118,7 @@ export default function HomeForm({ currentUser, onClose, onRefresh }) {
               </td>
             </tr>
 
-            {/* expiry date */}
+            {/* Expiry Date */}
             <tr>
               <td>Expiry Date:</td>
               <td>
@@ -101,7 +126,7 @@ export default function HomeForm({ currentUser, onClose, onRefresh }) {
               </td>
             </tr>
 
-            {/* quantity */}
+            {/* Quantity */}
             <tr>
               <td>Quantity:</td>
               <td>
@@ -109,7 +134,7 @@ export default function HomeForm({ currentUser, onClose, onRefresh }) {
               </td>
             </tr>
 
-            {/* category */}
+            {/* Category */}
             <tr>
               <td>Category:</td>
               <td>
@@ -120,7 +145,7 @@ export default function HomeForm({ currentUser, onClose, onRefresh }) {
               </td>
             </tr>
 
-            {/* measure per unit + unit */}
+            {/* Measure per Unit + Unit */}
             <tr>
               <td>Measure per Unit:</td>
               <td>
@@ -145,16 +170,18 @@ export default function HomeForm({ currentUser, onClose, onRefresh }) {
           </tbody>
         </table>
 
-        {/* messages */}
+        {/* Messages */}
         {error && <p className="error-msg">{error}</p>}
         {success && <p className="success-msg">{success}</p>}
 
-        {/* buttons */}
+        {/* Buttons */}
         <div className="form-buttons add-btn-container">
           <button type="submit" className="btn btn-green">Add Item</button>
+          <button type="button" className="btn btn-green" onClick={handleScanClick}>Scan Item</button>
           <button type="button" className="btn btn-green" onClick={onClose}>Back to Inventory</button>
         </div>
       </form>
     </div>
   );
 }
+
