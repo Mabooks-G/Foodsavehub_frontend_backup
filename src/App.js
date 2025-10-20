@@ -128,8 +128,8 @@ class App extends Component {
         `${API_BACKEND}/api/notifications`,
         { params: { email: this.state.currentUser.email } }
       );
-      const unread = res.data.filter(n => !n.notificationRead).length;
-      this.setState({ unreadCount: unread });
+      // const unread = res.data.filter(n => !n.notificationRead).length;
+      // this.setState({ unreadCount: unread });
       // FILTER OUT DELETED NOTIFICATIONS
     const unread = res.data.filter(n => !n.notificationRead && !n.notificationDeleted).length;
     this.setState({ unreadCount: unread });
