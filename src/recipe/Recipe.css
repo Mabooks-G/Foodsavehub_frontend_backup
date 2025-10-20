@@ -1,9 +1,21 @@
 /* Recipe.css */
-body, html {
-  height: auto;
-  overflow-y: auto;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.recipe-page {
   min-height: 100vh;
+  width: 100vw;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 20px;
 }
 
 /* Add these to your existing Recipe.css */

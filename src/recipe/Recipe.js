@@ -879,13 +879,13 @@ if (this.state.deleting) {
   );
 
   return (
-    <>
-      {modal}
-      {aiPanel}
-      {generatedPanel}
-      {savedPanel}
-    </>
-  );
+  <div className="recipe-page">
+    {modal}
+    {aiPanel}
+    {generatedPanel}
+    {savedPanel}
+  </div>
+);
 }
 }
 
