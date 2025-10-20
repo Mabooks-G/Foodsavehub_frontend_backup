@@ -32,62 +32,137 @@ export default function Notification({ currentUser, onRead, refreshFlag }) {
   // State to track errors while fetching or updating notifications
   const [error, setError] = useState("");
 
-  // Compute the number of unread notifications for display purposes
-  const unreadCount = notifications.filter(n => !n.notificationRead).length;
+  // Fixed line - exclude deleted notifications:
+const unreadCount = notifications.filter(n => !n.notificationRead && !n.notificationDeleted).length;
 
   // useEffect runs when the component mounts or when refreshFlag changes
   // This is responsible for fetching notifications from the backend API
-  useEffect(() => {
-    const fetchNotifications = async () => {
-      try {
-        // Retrieve the logged-in user from localStorage
-        const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
-
-        // Make a GET request to fetch notifications for the user
-        // The 'days' parameter limits notifications to those expiring in <= 2 days
-        const res = await axios.get(
-          `${API_BACKEND}/api/notifications`,
-          { params: { 
+  // Also update your fetch to filter out deleted notifications
+  // Update your fetchNotifications function with detailed logging
+// In your frontend fetchNotifications function
+// Replace your useEffect with this:
+useEffect(() => {
+  console.log("=== USEEFFECT TRIGGERED ===");
+  console.log("refreshFlag value:", refreshFlag);
+  
+  const fetchNotifications = async () => {
+    try {
+      console.log("=== STARTING FETCH ===");
+      
+      const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
+      console.log("Logged in user:", loggedInUser);
+      
+      if (!loggedInUser || !loggedInUser.email) {
+        console.error("No user found in localStorage");
+        return;
+      }
+      
+      console.log("Fetching notifications for:", loggedInUser.email);
+      console.log("API_BACKEND:", API_BACKEND);
+      
+      const res = await axios.get(
+        `${API_BACKEND}/api/notifications`,
+        { 
+          params: { 
             email: loggedInUser.email,
             days: 2
-          } }
-        );
+          },
+          timeout: 10000 // 10 second timeout
+        }
+      );
 
-        // Store the fetched notifications in component state
-        setNotifications(res.data);
+      console.log("=== API RESPONSE RECEIVED ===");
+      console.log("Response status:", res.status);
+      console.log("Response data:", res.data);
+      
+      // Filter out notifications that are marked as deleted
+      const activeNotifications = res.data.filter(
+        notification => !notification.notificationDeleted
+      );
 
-        // Clear any previous errors
-        setError("");
-      } catch (err) {
-        // Log the error and update state with an error message
-        console.error("Fetch notifications error:", err);
-        setError("Failed to load notifications.");
-      } finally {
-        // Stop showing the loading spinner/message
-        setLoading(false);
-      }
-    };
-
-    // Call the async function defined above
-    fetchNotifications();
-  }, [refreshFlag]); // re-run effect whenever refreshFlag changes
-
-  // Function to handle deleting a notification
-  const handleDelete = async (id) => {
-    const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
-
-    try {
-      // Send PUT request to mark the notification as deleted in the backend
-      await axios.put(`${API_BACKEND}/api/notifications/${id}/delete`, {}, {
-        params: { email: loggedInUser.email }
-      });
-
-      // Remove the notification from the UI immediately
-      setNotifications((prev) => prev.filter((item) => item.id !== id));
+      console.log("Active notifications after filter:", activeNotifications);
+      
+      // Calculate unread count for debugging
+      const unreadCount = activeNotifications.filter(n => !n.notificationRead).length;
+      console.log("=== FINAL CALCULATION ===");
+      console.log("Total notifications:", res.data.length);
+      console.log("Active notifications:", activeNotifications.length);
+      console.log("Unread count:", unreadCount);
+      
+      setNotifications(activeNotifications);
+      setError("");
+      
     } catch (err) {
-      console.error("Failed to mark notification as deleted:", err);
+      console.error("=== FETCH ERROR ===");
+      console.error("Error message:", err.message);
+      console.error("Error response:", err.response?.data);
+      console.error("Error status:", err.response?.status);
+      setError("Failed to load notifications.");
+    } finally {
+      console.log("=== FETCH COMPLETE ===");
+      setLoading(false);
     }
   };
+
+  fetchNotifications();
+}, [refreshFlag]);
+
+// Update the unread count to also exclude deleted notifications
+/*const unreadCount = notifications.filter(
+  n => !n.notificationRead && !n.notificationDeleted
+).length;*/
+
+  // Function to handle deleting a notification
+ const handleDelete = async (id) => {
+  const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
+  
+  console.log("=== DELETE DEBUGGING ===");
+  console.log("1. Starting delete for ID:", id);
+  console.log("2. User email:", loggedInUser?.email);
+  console.log("3. Full URL:", `${API_BACKEND}/api/notifications/${id}/delete`);
+  console.log("4. Current notifications count:", notifications.length);
+
+  try {
+    console.log("5. Making API call...");
+    
+    const response = await axios.put(`${API_BACKEND}/api/notifications/${id}/delete`, {}, {
+      params: { email: loggedInUser.email }
+    });
+
+    console.log("6. API call successful!");
+    console.log("7. Response status:", response.status);
+    console.log("8. Response data:", response.data);
+
+    // Remove the notification from the UI immediately
+    setNotifications((prev) => {
+      const updated = prev.filter((item) => item.id !== id);
+      console.log("9. UI updated. New count:", updated.length);
+      return updated;
+    });
+
+    // Force refresh by incrementing refreshFlag or re-fetching
+    if (onRead) {
+      onRead(); // This should trigger parent to refresh its count
+    }
+
+    // Notify parent with the new unread count
+  if (onRead) {
+    const newUnreadCount = notifications.filter(n => !n.notificationRead && n.id !== id).length;
+    onRead(newUnreadCount);
+  }
+
+  
+  } catch (err) {
+    console.log("10. API call FAILED!");
+    console.error("11. Error details:", err);
+    console.error("12. Error response:", err.response?.data);
+    console.error("13. Error status:", err.response?.status);
+    console.error("14. Error message:", err.message);
+    
+    // Show error to user
+    alert("Failed to delete notification. Check console for details.");
+  }
+};
 
   // Function to handle marking a notification as read
   const handleMarkAsRead = async (id) => {
@@ -111,6 +186,12 @@ export default function Notification({ currentUser, onRead, refreshFlag }) {
       // Notify parent component (if provided) that a notification was read
       if (onRead) onRead(id);
 
+      // Notify parent with the new unread count
+  if (onRead) {
+    const newUnreadCount = notifications.filter(n => !n.notificationRead && n.id !== id).length;
+    onRead(newUnreadCount);
+  }
+
     } catch (err) {
       console.error("Failed to mark notification as read:", err);
     }
@@ -129,6 +210,7 @@ export default function Notification({ currentUser, onRead, refreshFlag }) {
 
   // Render the notifications UI
   return (
+    <div class="notification-page">
     <div className="notification-container">
       <div className="notification-card">
         {/* Title of the notification panel */}
@@ -186,6 +268,7 @@ export default function Notification({ currentUser, onRead, refreshFlag }) {
           ))
         )}
       </div>
+    </div>
     </div>
   );
 }
