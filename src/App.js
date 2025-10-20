@@ -41,7 +41,7 @@ class App extends Component {
       unreadCount: 0,
       donationsNotifications: 0, 
       refreshFlag: false,
-      pushEnabled: false, //  new state for push notifications
+      //pushEnabled: false, //  new state for push notifications
       sidebarCollapsed: true, // Add mobile sidebar state
       isMobile: false // Add mobile detection
     };
@@ -56,7 +56,7 @@ class App extends Component {
     this.setState({ currentUser: user }, () => {
       this.fetchUnreadCount();
       this.fetchPendingDonations();
-       this.fetchPushEnabled(); //  fetch pushEnabled after login
+       //this.fetchPushEnabled(); //  fetch pushEnabled after login
       this.unreadInterval = setInterval(this.fetchUnreadCount, 10000);
       this.pendingInterval = setInterval(this.fetchPendingDonations, 1000); // optional refresh
     });
@@ -70,7 +70,7 @@ class App extends Component {
     if (this.state.currentUser) {
       this.fetchUnreadCount();
       this.fetchPendingDonations();
-      this.fetchPushEnabled(); // 🔹 fetch on mount too
+      //this.fetchPushEnabled(); // 🔹 fetch on mount too
       this.unreadInterval = setInterval(this.fetchUnreadCount, 10000);
       this.pendingInterval = setInterval(this.fetchPendingDonations, 1000); // optional refresh
     }
@@ -103,12 +103,13 @@ class App extends Component {
     if (prevState.refreshFlag !== this.state.refreshFlag && this.state.currentUser) {
       this.fetchUnreadCount();
       this.fetchPendingDonations();
-      this.fetchPushEnabled(); //  keep pushEnabled up to date
+      //this.fetchPushEnabled(); //  keep pushEnabled up to date
     }
   }
 
   handleLogout = () => {
-    this.setState({ currentUser: null, unreadCount: 0 , donationsNotifications: 0, pushEnabled: false});
+    //this.setState({ currentUser: null, unreadCount: 0 , donationsNotifications: 0, pushEnabled: false});
+     this.setState({ currentUser: null, unreadCount: 0 , donationsNotifications: 0});
     clearInterval(this.unreadInterval);
     clearInterval(this.pendingInterval);
   };
@@ -145,8 +146,9 @@ class App extends Component {
   */
   fetchPendingDonations = async () => {
     const email = this.state.currentUser?.email;
-     if (!email || !this.state.pushEnabled) { // disable if push disabled
-      console.log("[App] Push disabled or no current user email, skipping pending donations fetch");
+     //if (!email || !this.state.pushEnabled) { // disable if push disabled
+      if (!email) {
+      console.log("[App] No current user email, skipping pending donations fetch");
       return;
     }
 
@@ -169,22 +171,22 @@ class App extends Component {
      Description:Fetch pushEnabled state from backend
   */
 
-  fetchPushEnabled = async () => {
-    const email = this.state.currentUser?.email;
-    if (!email) return;
+  // fetchPushEnabled = async () => {
+  //   const email = this.state.currentUser?.email;
+  //   if (!email) return;
 
-    try {
-      //`${API_BACKEND}/api/dandc_notifications/pushEnabled`
-      const res = await axios.get(`http://localhost:5000/api/dandc_notifications/pushEnabled`, {
-        params: { email },
-      });
-      console.log("[App] pushEnabled response:", res.data); //  log raw response
-      this.setState({ pushEnabled: !!(res.data.pushEnabled ?? res.data.enabled) }) //  handle both possible keys
-    } catch (err) {
-      console.error("[App] Failed to fetch pushEnabled:", err);
-      this.setState({ pushEnabled: false });
-    }
-  };
+  //   try {
+  //     //`${API_BACKEND}/api/dandc_notifications/pushEnabled`
+  //     const res = await axios.get(`http://localhost:5000/api/dandc_notifications/pushEnabled`, {
+  //       params: { email },
+  //     });
+  //     console.log("[App] pushEnabled response:", res.data); //  log raw response
+  //     this.setState({ pushEnabled: !!(res.data.pushEnabled ?? res.data.enabled) }) //  handle both possible keys
+  //   } catch (err) {
+  //     console.error("[App] Failed to fetch pushEnabled:", err);
+  //     this.setState({ pushEnabled: false });
+  //   }
+  // };
 
 
   /* ------------------------------
@@ -206,7 +208,8 @@ toggleSidebar = () => {
    Description: Fixed mobile hamburger and sidebar behavior
 ----------------------------- */
 renderSidebar() {
-  const { unreadCount, sidebarCollapsed, isMobile, donationsNotifications, pushEnabled } = this.state;
+ // const { unreadCount, sidebarCollapsed, isMobile, donationsNotifications, pushEnabled } = this.state;
+   const { unreadCount, sidebarCollapsed, isMobile, donationsNotifications } = this.state;
 
   const sidebarClass = isMobile 
     ? sidebarCollapsed ? "collapsed" : "expanded"
@@ -219,7 +222,7 @@ renderSidebar() {
           m => !m.readreceipts && m.senderid !== currentUserId
         ).length;
 
-        if (!pushEnabled) unreadMessagesCount = 0;
+        //if (!pushEnabled) unreadMessagesCount = 0;
 
         return (
           <>
