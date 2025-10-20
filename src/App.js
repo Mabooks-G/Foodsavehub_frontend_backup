@@ -17,7 +17,6 @@ import Donor from './donation_coordination/donor';
 import GroceryList from './donation_coordination/grocerylist';
 import Recipes from './recipe/Recipe';
 import Waste from './waste_analyses/WasteAnalyses';
-import FoodManagement from './waste_analyses/FoodManagement';
 import Notifications from './notifications/Notification';
 import ExpiryManager from './expiry_manager/ExpiryManager';
 import BulkUpload from './database/BulkUpload';
