@@ -1,0 +1,88 @@
+/* Author: Nomusa
+   Event: Sprint 2
+   LatestUpdate: 28 Sept 2025
+   Description: Styles for Scan.js component, including card layout, buttons, and editable input
+*/
+
+/* Body styling */
+body {
+  font-family: Arial, sans-serif;
+  background: #f7f7f7; /* light gray background */
+  margin: 0;
+  height: 100vh;
+}
+
+/* Center the card container */
+.scan-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;  /* push card toward the top */
+  padding-top: 60px;        /* controls vertical positioning */
+  min-height: 100vh;
+}
+
+/* Card styling */
+.card {
+  background: #ffffff;          /* white background */
+  padding: 30px;                /* increase padding for larger card */
+  border-radius: 12px;          /* rounded corners */
+  box-shadow: 0 3px 6px rgba(0,0,0,0.1); /* subtle shadow */
+  width: 450px;                 /* card width */
+  text-align: center;
+  font-size: 1.1rem;   
+}
+
+/* Card header styling */
+.card-header {
+  font-weight: bold;
+  font-size: 22px;              /* larger header text */
+  margin-bottom: 16px;
+}
+
+/* Editable input field styling */
+.edit-input {
+  width: 100%;                  /* full width inside card */
+  padding: 8px;
+  font-size: 16px;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  outline: none;                /* remove default focus outline */
+}
+
+/* Button group layout */
+.btn-group {
+  display: flex;
+  gap: 12px;                    /* spacing between buttons */
+  margin-top: 15px;
+}
+
+/* Common button styling */
+.btn {
+  flex: 1;                       /* buttons share space equally */
+  padding: 10px;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.1s ease-in-out; /* smooth hover scale */
+}
+
+/* Button hover effect */
+.btn:hover {
+  transform: scale(1.05);        /* slightly enlarge on hover */
+}
+
+/* Specific button colors */
+.btn-accept {
+  background-color: #008000;     /* green for accept */
+}
+
+.btn-edit {
+  background-color: #ff9800;     /* orange for edit */
+}
+
+.btn-cancel {
+  background-color: #d32f2f;     /* red for cancel */
+}
