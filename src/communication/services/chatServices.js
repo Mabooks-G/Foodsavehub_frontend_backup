@@ -52,7 +52,7 @@ export async function updateChatHistory(donationid, senderid, chathistory, iv = 
     message_timestamp: message_timestamp || new Date().toISOString() // fallback
   };
   
-  //console.log('Sending to backend:', requestBody);
+  console.log('Sending to backend:', requestBody);
   
   const res = await fetch(`${API_BACKEND}/supabase/updateChatHistory`, {
     method: "POST",
@@ -98,5 +98,47 @@ export async function markDelivered(donationid, userId) {
   });
 
   if (!res.ok) throw new Error("Failed to mark delivered");
+  return res.json();
+}
+
+/* Author: Lethabo Mazui
+   Event: Sprint 3
+   LatestUpdate: Added delete chat functionality
+   Description: Soft-deletes all messages for a user in a donation chat and updates donation status if needed
+*/
+export async function deleteUserChat(donationid, userId) {
+  const res = await fetch(`${API_BACKEND}/supabase/deleteUserChat`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ donationid, userId }),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    console.error('Backend error details:', text);
+    throw new Error(`Failed to delete user chat: ${res.status} ${text}`);
+  }
+
+  return res.json();
+}
+
+/* Author: Lethabo Mazui
+   Event: Sprint 3
+   LatestUpdate: Added chat block status check
+   Description: Checks if a chat is blocked for any participant, works even when no messages exist
+*/
+export async function getChatBlockStatus(donationid, currentUserId) {
+  const res = await fetch(`${API_BACKEND}/supabase/getChatBlockStatus`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ donationid, currentUserId }),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    console.error('Backend error details:', text);
+    throw new Error(`Failed to get chat block status: ${res.status} ${text}`);
+  }
+
   return res.json();
 }
