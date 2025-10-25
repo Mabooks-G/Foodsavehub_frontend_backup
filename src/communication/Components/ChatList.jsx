@@ -7,64 +7,73 @@ import './ChatList.css';
 
 /* Author: Lethabo Mazui
    Event: Sprint 1
-   LatestUpdate: Added ChatList component
+   LatestUpdate: Added delete functionality with inline confirmation modal
    Description: Displays the list of all chats for the current user and handles navigation to ChatThread
 */
 export default function ChatList() {
   const navigate = useNavigate();
-  const { channels, setChannels, markChatRead, currentUserEmail, currentUserId } = useContext(ChatContext);
+  const { channels, setChannels, markChatRead, deleteUserChat, currentUserEmail, currentUserId } = useContext(ChatContext);
   const prevUnreadRef = useRef(0);
- //Added for navbar unread count
   const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
+  
+  // State for delete modal
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [chatToDelete, setChatToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  /* Author: Lethabo Mazui
-     Event: Sprint 1
-     LatestUpdate: Removed duplicate polling (now relies on ChatContext)
-     Description: ChatList now consumes chats directly from ChatContext instead of fetching independently
-  */
   useEffect(() => {
     // No need to fetch here; ChatContext handles polling + decryption
   }, [currentUserEmail]);
 
   /* Author: Lethabo Mazui
      Event: Sprint 1
-     LatestUpdate: Grouped messages by donationId
-     Description: Groups all chat messages by their donation for display
+     LatestUpdate: Grouped messages by donationId - backend already filters deleted chats
+     Description: Groups all chat messages by their donation for display. Backend filters out deleted messages, so we just group what's left.
   */
-  const donationChats = useMemo(() => {
-    const grouped = Object.values(
-      channels.reduce((acc, msg) => {
-        if (!acc[msg.donationid]) {
-          const otherMsg = channels.find(
-            m => m.donationid === msg.donationid && m.senderid !== currentUserId
-          );
+const donationChats = useMemo(() => {
+  // Backend already filters out messages deleted by current user (deleted_by array check)
+  // So channels only contains messages from active (non-deleted) chats
+  // We just need to group them by donation
+  
+  const grouped = Object.values(
+    channels.reduce((acc, msg) => {
+      if (!acc[msg.donationid]) {
+        const otherMsg = channels.find(
+          m => m.donationid === msg.donationid && m.senderid !== currentUserId
+        );
 
-          let otherParticipantName = '';
-          let avatarEmoji = '🍏';
+        let otherParticipantName = '';
+        let avatarEmoji = '🍏';
 
-          if (otherMsg) {
-            otherParticipantName = otherMsg.senderName || otherMsg.charityName || 'Unknown';
-            avatarEmoji = otherMsg.icon || '🍏';
-          } else {
-            otherParticipantName = msg.charityName || 'Unknown';
-            avatarEmoji = msg.icon || '🍏';
-          }
-
-          acc[msg.donationid] = {
-            donationid: msg.donationid,
-            messages: [],
-            participantName: otherParticipantName,
-            avatarEmoji: avatarEmoji,
-          };
+        if (otherMsg) {
+          otherParticipantName = otherMsg.senderName || otherMsg.charityName || 'Unknown';
+          avatarEmoji = otherMsg.icon || '🍏';
+        } else {
+          otherParticipantName = msg.charityName || 'Unknown';
+          avatarEmoji = msg.icon || '🍏';
         }
 
-        acc[msg.donationid].messages.push(msg);
-        return acc;
-      }, {})
-    );
+        acc[msg.donationid] = {
+          donationid: msg.donationid,
+          messages: [],
+          participantName: otherParticipantName,
+          avatarEmoji: avatarEmoji,
+        };
+      }
 
-    return grouped;
-  }, [channels, currentUserId]);
+      acc[msg.donationid].messages.push(msg);
+      return acc;
+    }, {})
+  );
+
+  // Sort messages within each donation by timestamp
+  grouped.forEach(group => {
+    group.messages.sort((a, b) => new Date(a.message_timestamp) - new Date(b.message_timestamp));
+  });
+
+  return grouped;
+}, [channels, currentUserId]);
+
 
   /* Author: Lethabo Mazui
      Event: Sprint 1
@@ -85,24 +94,28 @@ export default function ChatList() {
 
   /* Author: Lethabo Mazui
      Event: Sprint 1
-     LatestUpdate: Added unread message toast
-     Description: Displays a notification toast when new unread messages are received
+     LatestUpdate: Added unread message toast - backend already filters deleted chats
+     Description: Displays a notification toast when new unread messages are received. Backend filters deleted messages, so we just check unread/incoming status.
   */
   useEffect(() => {
-    // Only count non-empty messages
+    // Backend already filtered out deleted messages (getUserChats excludes deleted_by)
+    // So channels only contains active messages
     const totalUnread = channels.filter(
-      m =>
-      !m.readreceipts &&
-      m.senderid !== currentUserId &&
-      (
-        (m.chathistory && m.chathistory.trim() && m.chathistory.trim() !== 'Start a conversation...') ||
-        (m.decryptedText && m.decryptedText.trim() && m.decryptedText.trim() !== 'Start a conversation...')
-      )
+      m => {
+        // Must be unread
+        const isUnread = !m.readreceipts;
+        // Must be from someone else (incoming message)
+        const isIncoming = m.senderid !== currentUserId;
+        // Must have actual content (not placeholder)
+        const hasContent = (m.chathistory && m.chathistory.trim() && m.chathistory.trim() !== 'Start a conversation...') ||
+                          (m.decryptedText && m.decryptedText.trim() && m.decryptedText.trim() !== 'Start a conversation...');
+        
+        return isUnread && isIncoming && hasContent;
+      }
     ).length;
 
     if (totalUnread > prevUnreadRef.current) {
       const newMessages = totalUnread - prevUnreadRef.current;
-      // Update navbar badge
       setUnreadMessagesCount(newMessages);
       if (newMessages > 0){
         toast.info(`📩 You have ${newMessages} new unread message${newMessages > 1 ? 's' : ''}`);
@@ -133,14 +146,95 @@ export default function ChatList() {
     });
   };
 
+  /* Author: Assistant
+     LatestUpdate: Added delete chat handler
+     Description: Opens confirmation modal for chat deletion
+  */
+  const handleDeleteClick = (e, channel) => {
+    e.stopPropagation(); // Prevent opening the chat
+    setChatToDelete(channel);
+    setDeleteModalOpen(true);
+  };
+
+  /* Author: Assistant
+     LatestUpdate: Added delete confirmation handler
+     Description: Handles the actual deletion after user confirms
+  */
+  const handleConfirmDelete = async () => {
+    if (!chatToDelete || isDeleting) return;
+
+    setIsDeleting(true);
+    try {
+      await deleteUserChat(chatToDelete.donationid);
+      
+      toast.success(`Chat with ${chatToDelete.participantName} deleted successfully`);
+      
+      // Close modal and reset state
+      setDeleteModalOpen(false);
+      setChatToDelete(null);
+    } catch (error) {
+      console.error('Error deleting chat:', error);
+      toast.error('Failed to delete chat. Please try again.');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  /* Author: Assistant
+     LatestUpdate: Added modal close handler
+     Description: Closes the delete confirmation modal
+  */
+  const handleCloseModal = () => {
+    if (!isDeleting) {
+      setDeleteModalOpen(false);
+      setChatToDelete(null);
+    }
+  };
+
   /* Author: Lethabo Mazui
      Event: Sprint 1
-     LatestUpdate: Added render
-     Description: Renders the chat list page including chat previews, unread counts, and toast container
+     LatestUpdate: Added delete button and inline modal
+     Description: Renders the chat list page including chat previews, unread counts, delete buttons, and confirmation modal
   */
   return (
     <div className="chat-page">
       <ToastContainer position="top-right" autoClose={4000} hideProgressBar closeOnClick pauseOnHover />
+      
+      {/* Inline Delete Confirmation Modal */}
+      {deleteModalOpen && (
+        <div className="modal-overlay" onClick={handleCloseModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Delete Chat</h3>
+              <button className="modal-close" onClick={handleCloseModal}>×</button>
+            </div>
+            
+            <div className="modal-body">
+              <p>Are you sure you want to delete your conversation with <span className="participant-name">{chatToDelete?.participantName}</span>?</p>
+              <p className="donation-id-text">Donation #{chatToDelete?.donationid}</p>
+              <p className="modal-warning">This action cannot be undone.</p>
+            </div>
+            
+            <div className="modal-footer">
+          <button 
+          className="modal-btn cancel-btn" 
+          onClick={handleCloseModal}
+          disabled={isDeleting}
+          >
+          Cancel
+        </button>
+        <button 
+        className="modal-btn delete-btn" 
+        onClick={handleConfirmDelete}
+        disabled={isDeleting}
+          >
+          {isDeleting ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="chat-header">
         <button className="back-button" onClick={() => navigate('/communication')}>← Back</button>
         <h2>My Chats ({currentUserEmail})</h2>
@@ -153,13 +247,11 @@ export default function ChatList() {
       ) : (
         <div className="chat-list">
           {sortedChannels.map(channel => {
-            // Take the last sent message in the messages array
             const lastMsg = channel.messages[channel.messages.length - 1];
-
-            // Only show 'Start a conversation...' if the last message is empty
-            const lastMessage = (lastMsg?.chathistory?.trim() || lastMsg?.decryptedText?.trim()) || 'Start a conversation...';
-
-            // Only count non-empty unread messages
+            // Prefer decryptedText over chathistory for display
+            const lastMessageText = lastMsg?.decryptedText?.trim() || lastMsg?.chathistory?.trim() || '';
+            const lastMessage = lastMessageText || 'Start a conversation...';
+            
             const unreadCount = channel.messages.filter(
                 m => !m.readreceipts && m.senderid !== currentUserId &&
                   (
@@ -183,7 +275,17 @@ export default function ChatList() {
                   </div>
                   <div className="chat-last-message">{lastMessage}</div>
                 </div>
-                {unreadCount > 0 && <div className="unread-count">{unreadCount}</div>}
+                <div className="chat-actions">
+                  {unreadCount > 0 && <div className="unread-count">{unreadCount}</div>}
+                  <button
+                    className="delete-chat-btn"
+                    onClick={(e) => handleDeleteClick(e, channel)}
+                    aria-label="Delete chat"
+                    title="Delete chat"
+                  >
+                    🗑️
+                  </button>
+                </div>
               </div>
             );
           })}
